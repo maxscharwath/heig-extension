@@ -1,5 +1,6 @@
 import { createApp } from 'vue';
-import App from '../view/popup.vue';
-import '../assets/index.css';
+import router from '@/router';
+import App from '@/view/PopupView.vue';
+import '@/assets/index.css';
 
-createApp(App).mount('#app');
+createApp(App).use(router).mount('#app');

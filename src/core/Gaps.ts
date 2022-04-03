@@ -1,11 +1,11 @@
-import * as cheerio from 'cheerio';
-import { TypedEmitter } from 'tiny-typed-emitter';
-import ky, { ResponsePromise } from 'ky';
-import { KyInstance } from 'ky/distribution/types/ky';
 import { CheerioAPI } from 'cheerio';
-import { Input, Options } from 'ky/distribution/types/options';
+import { TypedEmitter } from 'tiny-typed-emitter';
+import ky, { Options, ResponsePromise } from 'ky';
+import { KyInstance } from 'ky/distribution/types/ky';
 import CourseInterface from '@/core/entity/CourseInterface';
 import GradeInterface from '@/core/entity/GradeInterface';
+import CheerioResponse from '@/core/CheerioResponse';
+import { Input } from 'ky/distribution/types/options';
 
 type Credentials = {
   username: string;
@@ -21,19 +21,17 @@ type UserInfo = {
   phoneNumber: string;
   addressStreet: string;
   pictureId: number;
-  picture: ArrayBuffer;
+  picture: string;
+  pictureUrl: string;
   id: number;
   email: string;
   addressCity: string;
   faculty: string;
 };
 
-interface CheerioResponse extends Response{
+type CheerioResponsePromise = ResponsePromise & Promise<{
   $: CheerioAPI;
-}
-interface CheerioResponsePromise extends ResponsePromise{
-  $: CheerioAPI;
-}
+}>;
 
 export default class GAPS extends TypedEmitter<{
   loginError: (status: string) => void;
@@ -41,9 +39,7 @@ export default class GAPS extends TypedEmitter<{
 }> {
   readonly #client: KyInstance;
 
-  private readonly gapsRequest: KyInstance;
-
-  #userId!: number;
+  #userId?: number;
 
   #baseUrl = 'https://gaps.heig-vd.ch';
 
@@ -54,31 +50,35 @@ export default class GAPS extends TypedEmitter<{
       credentials: 'same-origin',
       hooks: {
         afterResponse: [
-          async (_request, _options, response) => {
-            const res = response as CheerioResponse;
-            res.$ = cheerio.load(await res.text());
-            return res;
-          },
-        ],
-      },
-    });
-
-    this.gapsRequest = this.#client.extend({
-      hooks: {
-        afterResponse: [
-          async (request, _option, response) => {
-            const data = await response.text();
-            let content: string = data.replace(/^s*|s*$/, '');
-            const status = content[0];
-            if (status === '-' || status === '+') content = content.substring(2);
-            else throw new Error(content);
-          },
+          async (_request, _options, response) => CheerioResponse.from(response),
         ],
       },
     });
   }
 
-  private request(url: Input, options?: Options&{verify:boolean}): CheerioResponsePromise {
+  public async hasToken(): Promise<boolean> {
+    try {
+      await this.getToken();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  public async getToken(): Promise<string> {
+    const cookie = await chrome.cookies.get({ url: this.#baseUrl, name: 'GAPSSESSID' })
+    if (!cookie || !cookie.value) {
+      throw new Error('No cookie found');
+    }
+    return cookie.value;
+  }
+
+  public async setToken(token: string): Promise<void> {
+    await chrome.cookies.set({ url: this.#baseUrl, name: 'GAPSSESSID', value: token });
+  }
+
+  private request(url: Input, options: Options&{verify?:boolean, extended?:Options} = {}):
+    CheerioResponsePromise {
     return this.#client.extend({
       hooks: {
         afterResponse: [
@@ -88,33 +88,85 @@ export default class GAPS extends TypedEmitter<{
             if (res.$('#localaccessform').length > 0) {
               const statusText = res.$('.fauxLogin').text();
               this.emit('loginError', statusText);
+              console.error(`Login error: ${statusText}`);
               throw new Error(`Login failed: ${statusText}`);
             }
             return res;
           },
         ],
       },
-    })(url, options) as CheerioResponsePromise;
+    }).extend(options?.extended ?? {})(url, options) as CheerioResponsePromise;
+  }
+
+  private gapsRequest(url: Input, options: Options&{verify?:boolean}):CheerioResponsePromise {
+    return this.request(url, {
+      ...options,
+      extended: {
+        hooks: {
+          afterResponse: [
+            async (request, _option, response) => {
+              const data = await response.text();
+              let content: string = data.replace(/^s*|s*$/, '');
+              const status = content[0];
+              if (status === '-' || status === '+') content = content.substring(2);
+              else {
+                console.error(`GAPS: ${status} ${content}`);
+                throw new Error(content);
+              }
+              return new CheerioResponse(JSON.parse(content), response);
+            },
+          ],
+        },
+      },
+    })
   }
 
   public async loginCredentials(credentials: Credentials): Promise<boolean> {
-    const response = this.request('consultation/etudiant', {
-      method: 'POST',
-      verify: true,
-      searchParams: {
-        login: credentials.username,
-        password: credentials.password,
-        submit: 'Entrer',
-      },
-    });
-    const data = await response.text();
-    const userIdMatch = data.match(/DEFAULT_STUDENT_ID = ([0-9]+);/);
-    if (!userIdMatch) {
-      throw new Error('Unable to get userId');
+    try {
+      const response = this.request('consultation/etudiant', {
+        method: 'POST',
+        verify: true,
+        searchParams: {
+          login: credentials.username,
+          password: credentials.password,
+          submit: 'Entrer',
+        },
+      });
+      const data = await response.text();
+      const userIdMatch = data.match(/DEFAULT_STUDENT_ID = ([0-9]+);/);
+      if (!userIdMatch) {
+        return false;
+      }
+      this.#userId = +userIdMatch[1];
+      return true
+    } catch (e) {
+      this.emit('loginError', `${e}`);
+      return false;
     }
-    this.#userId = +userIdMatch[1];
-    console.log('userId', this.#userId);
-    return true;
+  }
+
+  public async loginCookie() {
+    try {
+      const response = await this.request('consultation/etudiant', {
+        method: 'GET',
+        verify: true,
+      });
+      const data = await response.text();
+      const userIdMatch = data.match(/DEFAULT_STUDENT_ID = ([0-9]+);/);
+      if (!userIdMatch) return false;
+      this.#userId = +userIdMatch[1];
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  public async autoLogin(credentials?: Credentials) {
+    if (await this.hasToken()
+      && await this.renewSession()
+      && (this.#userId || await this.loginCookie())
+    ) return true;
+    return credentials ? this.loginCredentials(credentials) : false;
   }
 
   public async renewSession(): Promise<boolean> {
@@ -133,11 +185,11 @@ export default class GAPS extends TypedEmitter<{
   }
 
   public async getYearAvailable(): Promise<number[]> {
-    const response = await this.request('consultation/controlescontinus/consultation.php', {
+    if (!this.#userId) throw new Error('Not logged in');
+    const { $ } = await this.request('consultation/controlescontinus/consultation.php', {
       method: 'GET',
       verify: true,
     });
-    const $ = cheerio.load(await response.text());
     return $('select option')
       .toArray()
       .reduce((prev: number[], e) => {
@@ -149,14 +201,14 @@ export default class GAPS extends TypedEmitter<{
   }
 
   public async getResults(year: number): Promise<CourseInterface[]> {
-    const response = await this.gapsRequest('consultation/controlescontinus/consultation.php', {
+    if (!this.#userId) throw new Error('Not logged in');
+    const { $ } = await this.gapsRequest('consultation/controlescontinus/consultation.php', {
       method: 'POST',
       searchParams: {
         rs: 'getStudentCCs',
         rsargs: `[${this.#userId},${year},null]`,
       },
     });
-    const $ = cheerio.load(await response.text());
     const courses: CourseInterface[] = [];
     let currentHeader: number;
     let currentSection: number;
@@ -226,14 +278,14 @@ export default class GAPS extends TypedEmitter<{
   }
 
   public async getInfo(): Promise<UserInfo> {
-    const response = await this.gapsRequest('consultation/etudiant', {
+    if (!this.#userId) throw new Error('Not logged in');
+    const { $ } = await this.gapsRequest('consultation/etudiant', {
       method: 'POST',
       searchParams: {
         rs: 'smartReplacePart',
         rsargs: `["STUDENT_SELECT_ID",null,null,null,null,${this.#userId},null]`,
       },
     });
-    const $ = cheerio.load(await response.text());
     const $infos = $('#infostandard b');
     const $infosA = $('#infoacademique b');
     const pictureId = parseInt(new URL($('#photo img').attr('src') ?? '', this.#baseUrl).searchParams.get('img') ?? '', 10);
@@ -244,6 +296,7 @@ export default class GAPS extends TypedEmitter<{
       firstName: $infos.eq(1).text().trim(),
       pictureId,
       picture: await this.getPicture(pictureId),
+      pictureUrl: this.getPictureUrl(pictureId),
       birthday: new Date(
         $infos
           .eq(2)
@@ -261,13 +314,27 @@ export default class GAPS extends TypedEmitter<{
     };
   }
 
-  private async getPicture(pictureId: number): Promise<ArrayBuffer> {
-    return this.request('consultation/annuaire/displayPicture.php', {
+  public getPictureUrl(pictureId: number): string {
+    const url = new URL(this.#baseUrl);
+    url.pathname = 'consultation/annuaire/displayPicture.php';
+    url.searchParams.set('img', `${pictureId}.jpg`);
+    return url.toString();
+  }
+
+  private async getPicture(pictureId: number): Promise<string> {
+    if (!this.#userId) throw new Error('Not logged in');
+    const blob = await this.request('consultation/annuaire/displayPicture.php', {
       verify: true,
       method: 'GET',
       searchParams: {
         img: `${pictureId}.jpg`,
       },
-    }).arrayBuffer();
+    }).blob();
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
   }
 }

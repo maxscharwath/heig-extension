@@ -6,7 +6,7 @@
     "background": {
         "service_worker": "/background.js"
     },
-    "host_permissions": ["https://apix.blacktree.io/*", "*://*heig-vd.ch/*"],
+    "host_permissions": ["https://apix.blacktree.io/*", "https://*heig-vd.ch/*"],
     "action": {
         "default_popup": "popup.html"
     },
@@ -20,5 +20,17 @@
             ]
         }
     ],
-    "options_page": "options.html"
+    "options_page": "options.html",
+    "permissions": [
+        "storage",
+        "tabs",
+        "activeTab",
+        "cookies",
+        "contextMenus",
+        "webRequest",
+        "webNavigation",
+        "webRequestBlocking",
+        "notifications",
+        "identity"
+    ]
 }
