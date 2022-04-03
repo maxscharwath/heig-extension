@@ -15,19 +15,31 @@ export default class GradesManager extends TypedEmitter<{
 }> {
   private gradesHash = new Set<string>();
 
+  private gradesData: CourseInterface[] = [];
+
+  private updatedAt?: Date;
+
   constructor() {
     super()
-    chrome.storage.local.get(['gradesHash'], ({ gradesHash }) => {
-      if (gradesHash) {
-        console.log('GradesManager: loading gradesHash from storage', gradesHash.length)
-        this.gradesHash = new Set(gradesHash)
-      }
+    chrome.storage.local.get(['gradesHash', 'gradesData'], ({ gradesHash, gradesData }) => {
+      this.gradesHash = new Set(gradesHash ?? []);
+      this.gradesData = gradesData ?? [];
     })
+  }
+
+  public getCourses(): CourseInterface[] {
+    return this.gradesData;
+  }
+
+  public getUpdatedAt(): Date | undefined {
+    return this.updatedAt;
   }
 
   public addCourses(courses: CourseInterface[]) {
     const newGrades:Grade[] = [];
     const tmpGradesHash = new Set<string>();
+    this.gradesData = courses;
+    this.updatedAt = new Date();
     courses.forEach(({ sections, ...course }) => {
       sections.forEach(({ grades, ...section }) => {
         grades.forEach((grade) => {
