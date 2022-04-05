@@ -1,8 +1,8 @@
-import CourseInterface from '@/core/entity/CourseInterface'
 import objectHash from 'object-hash'
+import { TypedEmitter } from 'tiny-typed-emitter'
+import CourseInterface from '@/core/entity/CourseInterface'
 import GradeInterface from '@/core/entity/GradeInterface'
 import SectionInterface from '@/core/entity/SectionInterface'
-import { TypedEmitter } from 'tiny-typed-emitter'
 
 type Grade = {
   course: Omit<CourseInterface, 'sections'>,

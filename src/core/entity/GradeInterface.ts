@@ -1,6 +1,6 @@
 export default interface GradeInterface {
   name: string;
-  date: Date;
+  date: string;
   coefficient: number;
   grade: number;
   average: number;

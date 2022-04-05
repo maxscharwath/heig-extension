@@ -1,16 +1,24 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import GradeView from '@/views/GradeView.vue'
 
-const routes: Array<RouteRecordRaw> = [
+export const routes: Array<RouteRecordRaw&{icon:string}> = [
   {
     path: '/',
-    name: 'home',
+    icon: 'mdi-school',
+    name: 'grade',
     component: GradeView,
   },
   {
-    path: '/about',
-    name: 'about',
-    component: () => import(/* webpackChunkName: "about" */ '../views/HomeView.vue'),
+    path: '/menu',
+    icon: 'mdi-silverware-variant',
+    name: 'menu',
+    component: () => import('@/views/MenuView.vue'),
+  },
+  {
+    path: '/settings',
+    icon: 'mdi-cog',
+    name: 'settings',
+    component: () => import('@/views/SettingsView.vue'),
   },
 ]
 
