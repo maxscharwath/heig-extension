@@ -2,10 +2,10 @@ import { CheerioAPI } from 'cheerio';
 import { TypedEmitter } from 'tiny-typed-emitter';
 import ky, { Options, ResponsePromise } from 'ky';
 import { KyInstance } from 'ky/distribution/types/ky';
+import { Input } from 'ky/distribution/types/options';
 import CourseInterface from '@/core/entity/CourseInterface';
 import GradeInterface from '@/core/entity/GradeInterface';
 import CheerioResponse from '@/core/CheerioResponse';
-import { Input } from 'ky/distribution/types/options';
 
 type Credentials = {
   username: string;
@@ -258,7 +258,7 @@ export default class GAPS extends TypedEmitter<{
               .text()
               .trim()
               .replace(/(\d{2}).(\d{2}).(\d{4})/, '$2/$1/$3'),
-          ),
+          ).toISOString(),
           coefficient:
             +(
               $td
