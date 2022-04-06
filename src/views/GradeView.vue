@@ -59,16 +59,11 @@ import { ref } from 'vue';
 import CourseInterface from '@/core/entity/CourseInterface';
 
 const result = ref<CourseInterface[]>([]);
-chrome.storage.local.get('result', (changes) => {
-  if (changes.result) {
-    result.value = changes.result;
-  }
+chrome.storage.local.get('gradesData', (changes) => {
+  result.value = changes?.gradesData ?? [];
 });
 chrome.storage.onChanged.addListener((changes) => {
-  console.log(changes);
-  if (changes.result) {
-    result.value = changes.result.newValue;
-  }
+  result.value = changes?.gradesData.newValue ?? [];
 });
 </script>
 

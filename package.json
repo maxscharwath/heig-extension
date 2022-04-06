@@ -13,6 +13,7 @@
     "cheerio": "^1.0.0-rc.10",
     "copy-webpack-plugin": "^10.2.4",
     "core-js": "^3.8.3",
+    "gun": "^0.2020.1236",
     "ky": "^0.30.0",
     "object-hash": "^3.0.0",
     "roboto-fontface": "*",

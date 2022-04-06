@@ -22,9 +22,17 @@ export default class GradesManager extends TypedEmitter<{
   constructor() {
     super()
     chrome.storage.local.get(['gradesHash', 'gradesData'], ({ gradesHash, gradesData }) => {
+      console.log('GradesManager: constructor', gradesHash, gradesData)
       this.gradesHash = new Set(gradesHash ?? []);
       this.gradesData = gradesData ?? [];
     })
+  }
+
+  public clear() {
+    this.gradesHash.clear();
+    this.gradesData = [];
+    this.updatedAt = undefined;
+    chrome.storage.local.set({ gradesHash: [], gradesData: [] })
   }
 
   public getCourses(): CourseInterface[] {
@@ -61,9 +69,10 @@ export default class GradesManager extends TypedEmitter<{
       })
     })
     this.gradesHash = tmpGradesHash;
-    chrome.storage.local.set({ gradesHash: [...this.gradesHash] })
+    chrome.storage.local.set({ gradesHash: [...this.gradesHash], gradesData: courses })
     if (newGrades.length > 0) {
       this.emit('newGrades', newGrades)
     }
+    console.log(`GradesManager: addCourses: ${newGrades.length} new grades`);
   }
 }
