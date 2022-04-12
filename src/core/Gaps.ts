@@ -7,13 +7,13 @@ import CourseInterface from '@/core/entity/CourseInterface';
 import GradeInterface from '@/core/entity/GradeInterface';
 import CheerioResponse from '@/core/CheerioResponse';
 
-type Credentials = {
+export type Credentials = {
   username: string;
   password: string;
 };
 
-type UserInfo = {
-  birthday: Date;
+export type UserInfo = {
+  birthday: string;
   mode: string;
   lastName: string;
   firstName: string;
@@ -121,8 +121,15 @@ export default class GAPS extends TypedEmitter<{
     })
   }
 
+  public async logout() {
+    await this.request('Shibboleth.sso/Logout', {
+      method: 'GET',
+    });
+  }
+
   public async loginCredentials(credentials: Credentials): Promise<boolean> {
     try {
+      await this.logout();
       const response = this.request('consultation/etudiant', {
         method: 'POST',
         verify: true,
@@ -303,7 +310,7 @@ export default class GAPS extends TypedEmitter<{
           .text()
           .trim()
           .replace(/(\d{2}).(\d{2}).(\d{4})/, '$2/$1/$3'),
-      ),
+      ).toISOString(),
       addressStreet: $infos.eq(3).text().trim(),
       addressCity: $infos.eq(4).text().trim(),
       phoneNumber: $infos.eq(5).text().trim(),

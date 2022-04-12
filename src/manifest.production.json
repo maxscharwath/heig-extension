@@ -1,12 +1,12 @@
 {
     "manifest_version": 3,
-    "name": "heig-extension",
-    "description": "chrome extension",
+    "name": "HEIG-VD Extension",
+    "description": "HEIG-VD extension is useful if you are a student at HEIG-VD",
     "version": "0.0.1",
     "background": {
         "service_worker": "/background.js"
     },
-    "host_permissions": ["https://apix.blacktree.io/*", "https://*heig-vd.ch/*"],
+    "host_permissions": ["https://apix.blacktree.io/*", "*://*.heig-vd.ch/*"],
     "action": {
         "default_popup": "popup.html"
     },
@@ -22,15 +22,8 @@
     ],
     "options_page": "options.html",
     "permissions": [
+        "alarms",
         "storage",
-        "tabs",
-        "activeTab",
-        "cookies",
-        "contextMenus",
-        "webRequest",
-        "webNavigation",
-        "webRequestBlocking",
-        "notifications",
-        "identity"
+        "cookies"
     ]
 }

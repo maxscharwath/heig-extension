@@ -12,6 +12,7 @@ type Grade = {
 export default class GradesManager extends TypedEmitter<{
   newGrade: (grade: Grade) => void;
   newGrades: (grades: Grade[]) => void;
+  onUpdate: () => void;
 }> {
   private gradesHash = new Set<string>();
 
@@ -32,7 +33,7 @@ export default class GradesManager extends TypedEmitter<{
     this.gradesHash.clear();
     this.gradesData = [];
     this.updatedAt = undefined;
-    chrome.storage.local.set({ gradesHash: [], gradesData: [] })
+    chrome.storage.local.set({ gradesHash: [], gradesData: [] }).finally()
   }
 
   public getCourses(): CourseInterface[] {
@@ -46,8 +47,6 @@ export default class GradesManager extends TypedEmitter<{
   public addCourses(courses: CourseInterface[]) {
     const newGrades:Grade[] = [];
     const tmpGradesHash = new Set<string>();
-    this.gradesData = courses;
-    this.updatedAt = new Date();
     courses.forEach(({ sections, ...course }) => {
       sections.forEach(({ grades, ...section }) => {
         grades.forEach((grade) => {
@@ -68,8 +67,15 @@ export default class GradesManager extends TypedEmitter<{
         })
       })
     })
+    this.gradesData = courses;
+    this.updatedAt = new Date();
     this.gradesHash = tmpGradesHash;
-    chrome.storage.local.set({ gradesHash: [...this.gradesHash], gradesData: courses })
+    this.emit('onUpdate');
+    chrome.storage.local.set({
+      updatedAt: this.updatedAt.toISOString(),
+      gradesHash: [...this.gradesHash],
+      gradesData: courses,
+    }).finally()
     if (newGrades.length > 0) {
       this.emit('newGrades', newGrades)
     }
