@@ -5,9 +5,19 @@ console.log(`Background script loaded at ${new Date().toLocaleString()}`);
 
 const gaps = new Gaps();
 const manager = new GradesManager();
-manager.on('newGrades', (grades) => {
-  console.log('new grades', grades);
-  chrome.action.setBadgeText({ text: `${grades.length}` });
+manager.on('newGrades', async (grades) => {
+  const newGrades = (await chrome.storage.local.get('newGrades')).newGrades ?? [];
+  console.log(newGrades, grades);
+  newGrades.push(...grades);
+  await chrome.storage.local.set({ newGrades });
+});
+chrome.storage.onChanged.addListener(async (changes) => {
+  if (changes.newGrades) {
+    const newGrades = changes.newGrades.newValue;
+    if (newGrades) {
+      await chrome.action.setBadgeText({ text: newGrades.length > 0 ? `${newGrades.length}` : '' });
+    }
+  }
 });
 
 async function checkResults() {

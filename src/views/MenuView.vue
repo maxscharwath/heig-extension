@@ -48,7 +48,7 @@
 <script lang="ts" setup>
 import objectHash from 'object-hash'
 import { onUnmounted, ref } from 'vue';
-import { db } from '@/core/database'
+import db from '@/core/database'
 import getStorageRef from '@/store/Storage';
 import { UserInfo } from '@/core/Gaps';
 

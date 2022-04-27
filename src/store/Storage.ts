@@ -1,4 +1,6 @@
-import { ref, Ref } from 'vue';
+import {
+  ref, Ref, toRaw, watch,
+} from 'vue';
 
 type StorageRef<T> = Ref<T> & {
   unlink: () => void;
@@ -6,22 +8,42 @@ type StorageRef<T> = Ref<T> & {
 export default function getStorageRef<T = any>(
   key: string,
   defaultValue?:T,
-  map?: (value: any|undefined) => T,
+  transformer?: {
+    from: (value: any) => T,
+    to: (value: T) => any
+  },
 ): StorageRef<T> {
   const reff = ref<T | undefined>(defaultValue) as unknown as StorageRef<T>;
   chrome.storage.local.get(key).then((data) => {
     let v = data[key];
-    if (map) v = map(v);
-    reff.value = v;
+    if (v === undefined) return;
+    if (transformer) {
+      v = transformer.from(v);
+    }
+    if (reff.value !== v) reff.value = v;
   });
   const listener = (changes:{ [p: string]: chrome.storage.StorageChange }) => {
-    let v = changes[key]?.newValue;
-    if (map) v = map(v);
-    reff.value = v;
+    if (!changes[key]) return;
+    let v = changes[key].newValue;
+    if (transformer) {
+      v = transformer.from(v);
+    }
+    if (reff.value !== v) reff.value = v;
   }
   chrome.storage.onChanged.addListener(listener);
+  const watcher = watch(reff, (v, oldV) => {
+    let rawV = toRaw(v);
+    const rawOldV = toRaw(oldV);
+    console.log('Watch', key, rawV, rawOldV);
+    if (rawV === rawOldV) return;
+    if (transformer) {
+      rawV = transformer.to(rawV);
+    }
+    chrome.storage.local.set({ [key]: rawV });
+  });
   reff.unlink = () => {
     chrome.storage.onChanged.removeListener(listener);
+    watcher();
   }
   return reff;
 }

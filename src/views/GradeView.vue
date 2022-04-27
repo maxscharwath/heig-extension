@@ -12,7 +12,10 @@
       <template v-for="course in result" :key="course.name">
         <v-expansion-panel v-if="!!course.average">
           <v-expansion-panel-title>
-            <v-list-item-icon icon="mdi-new-box" color="yellow" class="mr-2" size="large"/>
+            <v-list-item-icon
+              icon="mdi-new-box"
+              v-if="courseHasNewGrade(course)"
+              color="yellow" class="mr-2" size="large"/>
             {{course.name}}
             <v-spacer/>
             <v-chip color="primary" text>{{course.average}}</v-chip>
@@ -21,7 +24,9 @@
             <v-expansion-panels multiple>
               <v-expansion-panel v-for="section in course.sections" :key="section.name">
                 <v-expansion-panel-title>
-                  <v-list-item-icon icon="mdi-new-box" color="yellow" class="mr-2" size="large"/>
+                  <v-list-item-icon
+                    icon="mdi-new-box"
+                    v-if="sectionHasNewGrade(section)" color="yellow" class="mr-2" size="large"/>
                   {{section.name}}
                   <v-spacer/>
                   <v-chip color="primary" text>{{section.average}}</v-chip>
@@ -29,14 +34,15 @@
                 <v-expansion-panel-text>
                   <v-list>
                     <template v-for="grade in section.grades" :key="grade.name">
-                      <v-list-item v-if="!!grade.grade">
+                      <v-list-item v-if="!!grade.grade" @mouseover="checkGrade(grade)" @focus="checkGrade(grade)">
                         <v-list-item-icon
+                          v-if="gradeIsNew(grade)"
                           icon="mdi-new-box" color="yellow" class="mr-2" size="large"/>
                         <v-list-item-header>
                           <v-list-item-title>{{grade.name}}</v-list-item-title>
                           <v-list-item-subtitle>
                             <v-chip variant="outlined" class="mr-1" size="x-small" :ripple="false">
-                              <v-icon start icon="mdi-clock"></v-icon>
+                              <v-icon start icon="mdi-percent"></v-icon>
                               {{grade.coefficient}}
                             </v-chip>
                             <v-chip variant="outlined" class="mr-1" size="x-small" :ripple="false">
@@ -45,7 +51,6 @@
                             </v-chip>
                             <v-chip variant="outlined" class="mr-1" size="x-small" :ripple="false">
                               <v-icon start icon="mdi-clock"></v-icon>
-                              {{grade.weight}}
                               {{new Date(grade.date).toLocaleDateString()}}
                             </v-chip>
                           </v-list-item-subtitle>
@@ -67,18 +72,39 @@
 </template>
 
 <script lang="ts" setup>
-import { onUnmounted, ref } from 'vue';
+import { onUnmounted, ref, toRaw } from 'vue';
 import CourseInterface from '@/core/entity/CourseInterface';
 import getStorageRef from '@/store/Storage';
+import { Grade } from '@/core/manager/GradesManager';
+import GradeInterface from '@/core/entity/GradeInterface';
+import SectionInterface from '@/core/entity/SectionInterface';
 
 const result = getStorageRef<CourseInterface[]>('gradesData', []);
-const updateAt = getStorageRef<Date>('updatedAt', new Date(), (value) => new Date(value ?? 0));
+const newGrades = getStorageRef<Grade[]>('newGrades', []);
+const updateAt = getStorageRef<Date>('updatedAt', new Date(), {
+  from: (value) => new Date(value ?? 0),
+  to: (value) => value.toISOString(),
+});
+
 const loading = ref<boolean>(false);
 
+const gradeIsNew = (grade: GradeInterface) => newGrades.value.some((g) => g.grade.uuid === toRaw(grade).uuid);
+
+const sectionHasNewGrade = (section: SectionInterface) => toRaw(section)
+  .grades
+  .some((g) => gradeIsNew(g));
+
+const courseHasNewGrade = (course: CourseInterface) => toRaw(course)
+  .sections
+  .some((s) => sectionHasNewGrade(s))
 onUnmounted(() => {
   updateAt.unlink();
   result.unlink();
 });
+
+const checkGrade = (grade:GradeInterface) => {
+  newGrades.value = newGrades.value.filter((g) => g.grade.uuid !== toRaw(grade).uuid);
+}
 
 async function fetchGrades() {
   if (loading.value) {

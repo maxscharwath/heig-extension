@@ -1,6 +1,5 @@
 import GUN from 'gun'
 import 'gun/lib/then'
 
-export const db = GUN(['https://heig-extension.herokuapp.com/gun']);
-
-export const user = {}
+const db = GUN(['https://gun.stmx.ch/gun']);
+export default db;

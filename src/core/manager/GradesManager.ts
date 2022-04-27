@@ -4,7 +4,7 @@ import CourseInterface from '@/core/entity/CourseInterface'
 import GradeInterface from '@/core/entity/GradeInterface'
 import SectionInterface from '@/core/entity/SectionInterface'
 
-type Grade = {
+export type Grade = {
   course: Omit<CourseInterface, 'sections'>,
   section: Omit<SectionInterface, 'grades'>,
   grade: GradeInterface
