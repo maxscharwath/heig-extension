@@ -9,6 +9,14 @@ export type Grade = {
   section: Omit<SectionInterface, 'grades'>,
   grade: GradeInterface
 }
+export type NewGrades = {
+  [key: GradeInterface['uuid']]: [
+    CourseInterface['uuid'],
+    SectionInterface['uuid'],
+    GradeInterface['uuid']
+  ]
+}
+
 export default class GradesManager extends TypedEmitter<{
   newGrade: (grade: Grade) => void;
   newGrades: (grades: Grade[]) => void;
@@ -44,16 +52,23 @@ export default class GradesManager extends TypedEmitter<{
     return this.updatedAt;
   }
 
-  public addCourses(courses: CourseInterface[]) {
-    const newGrades:Grade[] = [];
+  public async addCourses(courses: CourseInterface[]) {
+    const newGrades: Grade[] = [];
     const tmpGradesHash = new Set<string>();
-    courses.forEach(({ sections, ...course }) => {
-      sections.forEach(({ grades, ...section }) => {
+    const newGradesNotification:NewGrades = (await chrome.storage.local.get('newGrades')).newGrades ?? {};
+    courses.forEach(({
+      sections,
+      ...course
+    }) => {
+      sections.forEach(({
+        grades,
+        ...section
+      }) => {
         grades.forEach((grade) => {
           if (Number.isNaN(grade.grade)) {
             return;
           }
-          const result:Grade = {
+          const result: Grade = {
             course,
             section,
             grade,
@@ -62,6 +77,7 @@ export default class GradesManager extends TypedEmitter<{
           tmpGradesHash.add(hash);
           if (!this.gradesHash.has(hash)) {
             newGrades.push(result);
+            newGradesNotification[grade.uuid] = [course.uuid, section.uuid, grade.uuid];
             this.emit('newGrade', result);
           }
         })
@@ -73,9 +89,11 @@ export default class GradesManager extends TypedEmitter<{
     this.emit('onUpdate');
     chrome.storage.local.set({
       updatedAt: this.updatedAt.toISOString(),
+      newGrades: newGradesNotification,
       gradesHash: [...this.gradesHash],
       gradesData: courses,
-    }).finally()
+    })
+      .finally()
     if (newGrades.length > 0) {
       this.emit('newGrades', newGrades)
     }

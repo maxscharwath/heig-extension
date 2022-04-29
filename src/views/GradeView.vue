@@ -14,11 +14,13 @@
           <v-expansion-panel-title>
             <v-list-item-icon
               icon="mdi-new-box"
-              v-if="courseHasNewGrade(course)"
-              color="yellow" class="mr-2" size="large"/>
+              v-if="courseHasNewGrade(course.uuid)"
+              color="yellow" class="mr-2" size="large"
+              @click="checkCourse(course.uuid)"
+            />
             {{course.name}}
             <v-spacer/>
-            <v-chip color="primary" text>{{course.average}}</v-chip>
+            <v-chip color="primary">{{course.average}}</v-chip>
           </v-expansion-panel-title>
           <v-expansion-panel-text>
             <v-expansion-panels multiple>
@@ -26,7 +28,10 @@
                 <v-expansion-panel-title>
                   <v-list-item-icon
                     icon="mdi-new-box"
-                    v-if="sectionHasNewGrade(section)" color="yellow" class="mr-2" size="large"/>
+                    v-if="sectionHasNewGrade(section.uuid)"
+                    color="yellow" class="mr-2" size="large"
+                    @click="checkSection(section.uuid)"
+                  />
                   {{section.name}}
                   <v-spacer/>
                   <v-chip color="primary" text>{{section.average}}</v-chip>
@@ -34,9 +39,11 @@
                 <v-expansion-panel-text>
                   <v-list>
                     <template v-for="grade in section.grades" :key="grade.name">
-                      <v-list-item v-if="!!grade.grade" @mouseover="checkGrade(grade)" @focus="checkGrade(grade)">
+                      <v-list-item v-if="!!grade.grade"
+                                   @mouseover="checkGrade(grade.uuid)"
+                                   @focus="checkGrade(grade.uuid)">
                         <v-list-item-icon
-                          v-if="gradeIsNew(grade)"
+                          v-if="gradeIsNew(grade.uuid)"
                           icon="mdi-new-box" color="yellow" class="mr-2" size="large"/>
                         <v-list-item-header>
                           <v-list-item-title>{{grade.name}}</v-list-item-title>
@@ -72,38 +79,55 @@
 </template>
 
 <script lang="ts" setup>
-import { onUnmounted, ref, toRaw } from 'vue';
+import { onUnmounted, ref } from 'vue';
 import CourseInterface from '@/core/entity/CourseInterface';
 import getStorageRef from '@/store/Storage';
-import { Grade } from '@/core/manager/GradesManager';
-import GradeInterface from '@/core/entity/GradeInterface';
-import SectionInterface from '@/core/entity/SectionInterface';
+import { NewGrades } from '@/core/manager/GradesManager';
 
-const result = getStorageRef<CourseInterface[]>('gradesData', []);
-const newGrades = getStorageRef<Grade[]>('newGrades', []);
-const updateAt = getStorageRef<Date>('updatedAt', new Date(), {
-  from: (value) => new Date(value ?? 0),
-  to: (value) => value.toISOString(),
+const result = getStorageRef<CourseInterface[]>('gradesData', { defaultValue: [] });
+const newGrades = getStorageRef<NewGrades>('newGrades', { defaultValue: {} });
+const updateAt = getStorageRef<Date, string>('updatedAt', {
+  defaultValue: new Date(),
+  transformer: {
+    from: (value) => new Date(value ?? 0),
+    to: (value) => value.toISOString(),
+  },
 });
 
 const loading = ref<boolean>(false);
 
-const gradeIsNew = (grade: GradeInterface) => newGrades.value.some((g) => g.grade.uuid === toRaw(grade).uuid);
+const gradeIsNew = (gradeUuid: string) => !!newGrades.value[gradeUuid];
+const sectionHasNewGrade = (sectionUuid: string) => Object.values(newGrades.value)
+  .some((grade) => grade[1] === sectionUuid);
+const courseHasNewGrade = (courseUuid: string) => Object.values(newGrades.value)
+  .some((grade) => grade[0] === courseUuid);
 
-const sectionHasNewGrade = (section: SectionInterface) => toRaw(section)
-  .grades
-  .some((g) => gradeIsNew(g));
-
-const courseHasNewGrade = (course: CourseInterface) => toRaw(course)
-  .sections
-  .some((s) => sectionHasNewGrade(s))
 onUnmounted(() => {
   updateAt.unlink();
   result.unlink();
 });
 
-const checkGrade = (grade:GradeInterface) => {
-  newGrades.value = newGrades.value.filter((g) => g.grade.uuid !== toRaw(grade).uuid);
+const checkGrade = (gradeUuid:string) => {
+  delete newGrades.value[gradeUuid];
+  newGrades.value = { ...newGrades.value };
+}
+
+const checkSection = (sectionUuid:string) => {
+  Object.entries(newGrades.value).forEach(([gradeUuid, data]) => {
+    if (data[1] === sectionUuid) {
+      delete newGrades.value[gradeUuid];
+    }
+  });
+  newGrades.value = { ...newGrades.value };
+}
+
+const checkCourse = (courseUuid:string) => {
+  Object.entries(newGrades.value).forEach(([gradeUuid, data]) => {
+    if (data[0] === courseUuid) {
+      delete newGrades.value[gradeUuid];
+    }
+  });
+  newGrades.value = { ...newGrades.value };
 }
 
 async function fetchGrades() {

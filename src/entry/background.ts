@@ -1,21 +1,16 @@
 import Gaps from '@/core/Gaps';
-import GradesManager from '@/core/manager/GradesManager'
+import GradesManager, { NewGrades } from '@/core/manager/GradesManager';
 
 console.log(`Background script loaded at ${new Date().toLocaleString()}`);
 
 const gaps = new Gaps();
 const manager = new GradesManager();
-manager.on('newGrades', async (grades) => {
-  const newGrades = (await chrome.storage.local.get('newGrades')).newGrades ?? [];
-  console.log(newGrades, grades);
-  newGrades.push(...grades);
-  await chrome.storage.local.set({ newGrades });
-});
 chrome.storage.onChanged.addListener(async (changes) => {
   if (changes.newGrades) {
-    const newGrades = changes.newGrades.newValue;
+    const newGrades:NewGrades = changes.newGrades.newValue;
     if (newGrades) {
-      await chrome.action.setBadgeText({ text: newGrades.length > 0 ? `${newGrades.length}` : '' });
+      const nbGrades = Object.values(newGrades).length;
+      await chrome.action.setBadgeText({ text: nbGrades > 0 ? `${nbGrades}` : '' });
     }
   }
 });

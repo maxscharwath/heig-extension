@@ -300,7 +300,10 @@ export default class GAPS extends TypedEmitter<{
     });
     const $infos = $('#infostandard b');
     const $infosA = $('#infoacademique b');
-    const pictureId = parseInt(new URL($('#photo img').attr('src') ?? '', this.#baseUrl).searchParams.get('img') ?? '', 10);
+    const pictureId = parseInt(new URL(
+      $('#photo img').attr('src') ?? '',
+      this.#baseUrl,
+    ).searchParams.get('img') ?? '', 10);
 
     return {
       id: this.#userId,
