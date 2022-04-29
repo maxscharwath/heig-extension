@@ -4,14 +4,23 @@ import CourseInterface from '@/core/entity/CourseInterface'
 import GradeInterface from '@/core/entity/GradeInterface'
 import SectionInterface from '@/core/entity/SectionInterface'
 
-type Grade = {
+export type Grade = {
   course: Omit<CourseInterface, 'sections'>,
   section: Omit<SectionInterface, 'grades'>,
   grade: GradeInterface
 }
+export type NewGrades = {
+  [key: GradeInterface['uuid']]: [
+    CourseInterface['uuid'],
+    SectionInterface['uuid'],
+    GradeInterface['uuid']
+  ]
+}
+
 export default class GradesManager extends TypedEmitter<{
   newGrade: (grade: Grade) => void;
   newGrades: (grades: Grade[]) => void;
+  onUpdate: () => void;
 }> {
   private gradesHash = new Set<string>();
 
@@ -32,7 +41,7 @@ export default class GradesManager extends TypedEmitter<{
     this.gradesHash.clear();
     this.gradesData = [];
     this.updatedAt = undefined;
-    chrome.storage.local.set({ gradesHash: [], gradesData: [] })
+    chrome.storage.local.set({ gradesHash: [], gradesData: [] }).finally()
   }
 
   public getCourses(): CourseInterface[] {
@@ -43,18 +52,23 @@ export default class GradesManager extends TypedEmitter<{
     return this.updatedAt;
   }
 
-  public addCourses(courses: CourseInterface[]) {
-    const newGrades:Grade[] = [];
+  public async addCourses(courses: CourseInterface[]) {
+    const newGrades: Grade[] = [];
     const tmpGradesHash = new Set<string>();
-    this.gradesData = courses;
-    this.updatedAt = new Date();
-    courses.forEach(({ sections, ...course }) => {
-      sections.forEach(({ grades, ...section }) => {
+    const newGradesNotification:NewGrades = (await chrome.storage.local.get('newGrades')).newGrades ?? {};
+    courses.forEach(({
+      sections,
+      ...course
+    }) => {
+      sections.forEach(({
+        grades,
+        ...section
+      }) => {
         grades.forEach((grade) => {
           if (Number.isNaN(grade.grade)) {
             return;
           }
-          const result:Grade = {
+          const result: Grade = {
             course,
             section,
             grade,
@@ -63,13 +77,23 @@ export default class GradesManager extends TypedEmitter<{
           tmpGradesHash.add(hash);
           if (!this.gradesHash.has(hash)) {
             newGrades.push(result);
+            newGradesNotification[grade.uuid] = [course.uuid, section.uuid, grade.uuid];
             this.emit('newGrade', result);
           }
         })
       })
     })
+    this.gradesData = courses;
+    this.updatedAt = new Date();
     this.gradesHash = tmpGradesHash;
-    chrome.storage.local.set({ gradesHash: [...this.gradesHash], gradesData: courses })
+    this.emit('onUpdate');
+    chrome.storage.local.set({
+      updatedAt: this.updatedAt.toISOString(),
+      newGrades: newGradesNotification,
+      gradesHash: [...this.gradesHash],
+      gradesData: courses,
+    })
+      .finally()
     if (newGrades.length > 0) {
       this.emit('newGrades', newGrades)
     }

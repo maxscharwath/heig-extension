@@ -6,14 +6,15 @@ import { Input } from 'ky/distribution/types/options';
 import CourseInterface from '@/core/entity/CourseInterface';
 import GradeInterface from '@/core/entity/GradeInterface';
 import CheerioResponse from '@/core/CheerioResponse';
+import objectHash from 'object-hash';
 
-type Credentials = {
+export type Credentials = {
   username: string;
   password: string;
 };
 
-type UserInfo = {
-  birthday: Date;
+export type UserInfo = {
+  birthday: string;
   mode: string;
   lastName: string;
   firstName: string;
@@ -121,8 +122,15 @@ export default class GAPS extends TypedEmitter<{
     })
   }
 
+  public async logout() {
+    await this.request('Shibboleth.sso/Logout', {
+      method: 'GET',
+    });
+  }
+
   public async loginCredentials(credentials: Credentials): Promise<boolean> {
     try {
+      await this.logout();
       const response = this.request('consultation/etudiant', {
         method: 'POST',
         verify: true,
@@ -220,6 +228,7 @@ export default class GAPS extends TypedEmitter<{
         const average = +$header.text().trim().split(' : ')[1];
         currentHeader = courses.length;
         courses[currentHeader] = {
+          uuid: objectHash({ name, year }),
           name,
           average,
           year,
@@ -230,11 +239,13 @@ export default class GAPS extends TypedEmitter<{
       const $section = $tr.find('td.odd, td.edge');
       if ($section.length > 0) {
         const s = $section.html()?.split('<br>');
-        currentSection = courses[currentHeader].sections.length;
+        const course = courses[currentHeader];
+        currentSection = course.sections.length;
         if (s) {
           const name = s[0];
           const average = +s[1].trim().split(' : ')[1];
           courses[currentHeader].sections[currentSection] = {
+            uuid: objectHash({ name, year, course: course.uuid }),
             name,
             average,
             grades: [],
@@ -251,6 +262,7 @@ export default class GAPS extends TypedEmitter<{
           : $td.eq(1).text().trim();
 
         const grade: GradeInterface = {
+          uuid: objectHash({ title, year, section: section.uuid }),
           name: title,
           date: new Date(
             $td
@@ -288,7 +300,10 @@ export default class GAPS extends TypedEmitter<{
     });
     const $infos = $('#infostandard b');
     const $infosA = $('#infoacademique b');
-    const pictureId = parseInt(new URL($('#photo img').attr('src') ?? '', this.#baseUrl).searchParams.get('img') ?? '', 10);
+    const pictureId = parseInt(new URL(
+      $('#photo img').attr('src') ?? '',
+      this.#baseUrl,
+    ).searchParams.get('img') ?? '', 10);
 
     return {
       id: this.#userId,
@@ -303,7 +318,7 @@ export default class GAPS extends TypedEmitter<{
           .text()
           .trim()
           .replace(/(\d{2}).(\d{2}).(\d{4})/, '$2/$1/$3'),
-      ),
+      ).toISOString(),
       addressStreet: $infos.eq(3).text().trim(),
       addressCity: $infos.eq(4).text().trim(),
       phoneNumber: $infos.eq(5).text().trim(),

@@ -12,9 +12,11 @@ module.exports = {
     ecmaVersion: 2020,
   },
   rules: {
+    'max-len': ['warn', { code: 120 }],
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     semi: 'off',
+    'no-param-reassign': ['error', { props: false }],
     'global-require': 'off',
     'no-undef': 'off',
   },

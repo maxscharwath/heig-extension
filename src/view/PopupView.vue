@@ -1,5 +1,5 @@
 <template>
-  <v-app theme="dark" style="min-height: 561px;min-width: 350px;">
+  <v-app theme="dark" class="app">
     <v-app-bar>
         <v-tabs
           stacked
@@ -12,9 +12,7 @@
         </v-tabs>
     </v-app-bar>
     <v-main>
-      <v-container fluid>
         <router-view/>
-      </v-container>
     </v-main>
   </v-app>
 </template>
@@ -23,6 +21,11 @@
 import { routes } from '@/router'
 </script>
 
-<style>
+<style scoped>
+.app {
+  height: 575px;
+  width: 375px;
+  overflow: auto;
+}
 
 </style>

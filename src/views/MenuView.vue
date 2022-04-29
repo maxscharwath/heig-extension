@@ -1,15 +1,20 @@
 <template>
-  <v-container>
-    <v-progress-linear indeterminate v-if="loading"/>
-    <v-btn @click="fetchMenu">refresh menu</v-btn>
+  <v-app-bar app dense>
+    <v-app-bar-title>Menus du Jour</v-app-bar-title>
+    <v-spacer></v-spacer>
+    <v-btn icon @click="fetchMenu">
+      <v-icon>mdi-refresh</v-icon>
+    </v-btn>
+  </v-app-bar>
+  <v-progress-linear indeterminate="true" v-if="loading"/>
+  <v-container fluid>
     <template v-if="menus">
       <template v-for="(menu,index) in menus.menus" :key="index">
         <v-card
           class="text-center mb-3"
-          dark
           v-if="!!menu.starter || !!menu.dessert || !!menu.mainCourse.join()"
         >
-          <v-card-header>
+          <v-card-header class="d-flex justify-center">
             <div>
               <div class="text-overline">{{menu.starter}}</div>
               <v-divider/>
@@ -20,9 +25,10 @@
             </div>
           </v-card-header>
           <v-card-actions class="d-flex justify-center">
+            {{menu.rating.count}}
             <v-rating
-              v-model="menu.rating"
-              @change="rateMenu(menu.hash,menu.rating)"
+              v-model="menu.rating.value"
+              @change="rateMenu(menu.hash,menu.rating.value)"
               empty-icon="mdi-heart-outline"
               full-icon="mdi-heart"
               half-icon="mdi-heart-half-full"
@@ -41,8 +47,16 @@
 
 <script lang="ts" setup>
 import objectHash from 'object-hash'
-import { ref } from 'vue'
-import { db } from '@/core/database'
+import { onUnmounted, ref } from 'vue';
+import db from '@/core/database'
+import getStorageRef from '@/store/Storage';
+import { UserInfo } from '@/core/Gaps';
+
+const info = getStorageRef<UserInfo>('info');
+
+onUnmounted(() => {
+  info.unlink();
+});
 
 export interface Menu {
   starter: string;
@@ -50,7 +64,10 @@ export interface Menu {
   dessert: string;
   containsPork: boolean;
   hash: string;
-  rating: number;
+  rating: {
+    value: number;
+    count: number;
+  };
 }
 
 export interface MenuResponse {
@@ -64,21 +81,10 @@ const loading = ref(false);
 const ratings = db.get('menu_ratings');
 
 async function rateMenu(hash:string, rating:number) {
-  const d = await ratings.get(hash).then();
-  const nbVotes = d?.nbVotes ?? 0;
-  const currentRating = d?.rating ?? 0;
-  ratings.get(hash).put({
-    nbVotes: nbVotes + 1,
-    rating: (currentRating * nbVotes + rating) / (nbVotes + 1),
-  });
+  const uuid = info.value.id;
+  if (!uuid) return;
+  ratings.get(hash).put({ ratings: { [uuid]: rating } });
 }
-ratings.map().on((data, key) => {
-  console.log(key, data);
-  const menu = menus.value?.menus.find((m) => m.hash === key);
-  if (menu) {
-    menu.rating = data.rating;
-  }
-})
 
 async function fetchMenu(): Promise<MenuResponse> {
   loading.value = true;
@@ -89,15 +95,21 @@ async function fetchMenu(): Promise<MenuResponse> {
   data.menus = data.menus.map((menu) => ({
     ...menu,
     hash: objectHash(menu),
-    rating: 0,
+    rating: {
+      value: 0,
+      count: 0,
+    },
   }));
   menus.value = data;
-  // eslint-disable-next-line no-restricted-syntax
-  for (const menu of menus.value.menus) {
-    ratings.get(menu.hash).then().then(({ rating }) => {
-      menu.rating = rating ?? 0;
-    });
-  }
+  menus.value?.menus.forEach((menu) => {
+    ratings.get(menu.hash).get('ratings').on(({ _, ...r }) => {
+      const rates:number[] = Object.values(r);
+      menu.rating = {
+        value: rates.reduce((a, b) => a + b, 0) / rates.length,
+        count: rates.length,
+      };
+    }, true)
+  });
   return data;
 }
 fetchMenu();
