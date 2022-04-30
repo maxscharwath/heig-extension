@@ -18,8 +18,8 @@ export type NewGrades = {
 }
 
 export default class GradesManager extends TypedEmitter<{
-  newGrade: (grade: Grade) => void;
-  newGrades: (grades: Grade[]) => void;
+  newGrade: (_grade: Grade) => void;
+  newGrades: (_grades: Grade[]) => void;
   onUpdate: () => void;
 }> {
   private gradesHash = new Set<string>();

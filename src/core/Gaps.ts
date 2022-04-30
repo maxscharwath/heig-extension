@@ -35,8 +35,8 @@ type CheerioResponsePromise = ResponsePromise & Promise<{
 }>;
 
 export default class GAPS extends TypedEmitter<{
-  loginError: (status: string) => void;
-  sessionExpireSoon: (expireIn: number) => void;
+  loginError: (_status: string) => void;
+  sessionExpireSoon: (_expireIn: number) => void;
 }> {
   readonly #client: KyInstance;
 

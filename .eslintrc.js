@@ -19,5 +19,10 @@ module.exports = {
     'no-param-reassign': ['error', { props: false }],
     'global-require': 'off',
     'no-undef': 'off',
+    'no-unused-vars': ['error', {
+      destructuredArrayIgnorePattern: '^_',
+      argsIgnorePattern: '^_',
+      ignoreRestSiblings: true,
+    }],
   },
 };

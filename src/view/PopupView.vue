@@ -7,7 +7,7 @@
         >
           <v-tab v-for="route in routes" :key="route.path" :to="route.path">
             <v-icon>{{ route.icon }}</v-icon>
-            {{route.name}}
+            {{ $vuetify.locale.getScope().t(route.i18n) }}
           </v-tab>
         </v-tabs>
     </v-app-bar>

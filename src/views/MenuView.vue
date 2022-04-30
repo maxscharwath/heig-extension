@@ -1,6 +1,6 @@
 <template>
   <v-app-bar app dense>
-    <v-app-bar-title>Menus du Jour</v-app-bar-title>
+    <v-app-bar-title>{{$vuetify.locale.getScope().t('$vuetify.menu.menuOfDay')}}</v-app-bar-title>
     <v-spacer></v-spacer>
     <v-btn icon @click="fetchMenu">
       <v-icon>mdi-refresh</v-icon>

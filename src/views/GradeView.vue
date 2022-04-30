@@ -1,6 +1,8 @@
 <template>
   <v-app-bar app dense>
-    <div class="text-caption">Last Check at {{updateAt.toLocaleString()}}</div>
+    <div class="text-caption">
+      {{$vuetify.locale.getScope().t('$vuetify.grades.lastCheckAt')}} {{updateAt.toLocaleString()}}
+    </div>
     <v-spacer></v-spacer>
     <v-btn icon @click="fetchGrades">
       <v-icon>mdi-refresh</v-icon>
@@ -16,7 +18,7 @@
               icon="mdi-new-box"
               v-if="courseHasNewGrade(course.uuid)"
               color="yellow" class="mr-2" size="large"
-              @click="checkCourse(course.uuid)"
+              @click.stop.prevent="checkCourse(course.uuid)"
             />
             {{course.name}}
             <v-spacer/>
@@ -30,7 +32,7 @@
                     icon="mdi-new-box"
                     v-if="sectionHasNewGrade(section.uuid)"
                     color="yellow" class="mr-2" size="large"
-                    @click="checkSection(section.uuid)"
+                    @click.stop.prevent="checkSection(section.uuid)"
                   />
                   {{section.name}}
                   <v-spacer/>

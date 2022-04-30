@@ -16,30 +16,35 @@
               <v-list>
                 <v-list-item>
                   <v-list-item-content>
-                    <v-list-item-title>Email</v-list-item-title>
+                    <v-list-item-title>{{$vuetify.locale.getScope().t('$vuetify.settings.email')}}</v-list-item-title>
                     <v-list-item-subtitle>{{ info.email }}</v-list-item-subtitle>
                   </v-list-item-content>
                 </v-list-item>
                 <v-list-item>
                   <v-list-item-content>
-                    <v-list-item-title>Phone</v-list-item-title>
+                    <v-list-item-title>{{$vuetify.locale.getScope().t('$vuetify.settings.phone')}}</v-list-item-title>
                     <v-list-item-subtitle>{{ info.phoneNumber }}</v-list-item-subtitle>
                   </v-list-item-content>
                 </v-list-item>
                 <v-list-item>
                   <v-list-item-content>
-                    <v-list-item-title>Address</v-list-item-title>
+                    <v-list-item-title>{{$vuetify.locale.getScope().t('$vuetify.settings.address')}}</v-list-item-title>
                     <v-list-item-subtitle>{{ info.addressStreet }}</v-list-item-subtitle>
                     <v-list-item-subtitle>{{ info.addressCity }}</v-list-item-subtitle>
                   </v-list-item-content>
                 </v-list-item>
                 <v-list-item>
                   <v-list-item-content>
-                    <v-list-item-title>Birthday</v-list-item-title>
+                    <v-list-item-title>
+                      {{$vuetify.locale.getScope().t('$vuetify.settings.birthday')}}
+                    </v-list-item-title>
                     <v-list-item-subtitle>
                       {{ new Date(info.birthday).toLocaleDateString() }}
                     </v-list-item-subtitle>
                   </v-list-item-content>
+                </v-list-item>
+                <v-list-item>
+                  <v-btn color="error" @click="logout">{{$vuetify.locale.getScope().t('$vuetify.settings.logout')}}</v-btn>
                 </v-list-item>
               </v-list>
             </v-expansion-panel-text>
@@ -47,28 +52,47 @@
         </v-expansion-panels>
       </v-card-text>
     </v-card>
-    <v-card class="mb-3">
+    <v-card v-else class="mb-3">
         <v-card-title>
-          GAPS Credentials
+          {{$vuetify.locale.getScope().t('$vuetify.settings.gapsCredentials')}}
         </v-card-title>
         <v-card-content>
         <v-text-field
           v-model="settings.credential.username"
-          label="Username"
+          :label="$vuetify.locale.getScope().t('$vuetify.settings.username')"
           :rules="[v => !!v || 'Username is required']"
         />
         <v-text-field
           v-model="settings.credential.password"
-          label="Password"
+          :label="$vuetify.locale.getScope().t('$vuetify.settings.password')"
           type="password"
           :rules="[v => !!v || 'Password is required']"
         />
       </v-card-content>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="danger" @click="logout">Logout</v-btn>
-        <v-btn color="primary" @click="save">Login</v-btn>
+        <v-btn color="error" @click="logout">{{$vuetify.locale.getScope().t('$vuetify.settings.logout')}}</v-btn>
+        <v-btn color="primary" @click="save">{{$vuetify.locale.getScope().t('$vuetify.settings.login')}}</v-btn>
       </v-card-actions>
+    </v-card>
+
+    <v-card>
+      <v-list>
+        <v-list-subheader>Informations</v-list-subheader>
+        <v-list-item>
+          <v-list-item-avatar><v-icon>mdi-information</v-icon></v-list-item-avatar>
+          <v-list-item-content>
+            <v-list-item-title>Version</v-list-item-title>
+            <v-list-item-subtitle>{{getManifest().version}}</v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+      <v-list-item href="https://github.com/maxscharwath/heig-extension" link target="_blank">
+        <v-list-item-avatar><v-icon>mdi-github</v-icon></v-list-item-avatar>
+        <v-list-item-content>
+          <v-list-item-title>Source Code</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
     </v-card>
   </v-container>
 </template>
@@ -86,8 +110,12 @@ const settings = ref({
   },
 });
 
+const getManifest = () => chrome.runtime.getManifest();
+
 const info = getStorageRef<UserInfo>('info');
-const years = getStorageRef<number[]>('years', []);
+const years = getStorageRef<number[]>('years', {
+  defaultValue: [],
+});
 
 onUnmounted(() => {
   info.unlink();

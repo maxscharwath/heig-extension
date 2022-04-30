@@ -16,8 +16,8 @@ export default function getStorageRef<T = unknown, U = unknown>(
     storageArea?: StorageArea;
     defaultValue?: T;
     transformer?: {
-      from: (value: U) => T,
-      to: (value: T) => U
+      from: (_value: U) => T,
+      to: (_value: T) => U
     };
   } = {},
 ): StorageRef<T> {
