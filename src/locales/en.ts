@@ -20,5 +20,9 @@ export default {
     gapsCredentials: 'Gaps Credentials',
     logout: 'Logout',
     login: 'Login',
+    alarm: {
+      title: 'Check for new grades',
+      data: 'Every {0} minutes',
+    },
   },
 }

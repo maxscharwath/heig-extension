@@ -82,7 +82,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         break;
       case 'saveSettings':
         {
-          const result = await login(payload);
+          const result = await login(payload.credentials);
+          chrome.alarms.create('checkResults', {
+            periodInMinutes: payload.checkResultsInterval,
+          });
           sendResponse({ success: result });
         }
         break;

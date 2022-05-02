@@ -20,5 +20,9 @@ export default {
     gapsCredentials: 'Gaps Connexion',
     logout: 'Déconnexion',
     login: 'Connexion',
+    alarm: {
+      title: 'Verification des notes',
+      data: 'Toutes les {0} minutes',
+    },
   },
 }

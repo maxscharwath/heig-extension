@@ -58,12 +58,12 @@
         </v-card-title>
         <v-card-content>
         <v-text-field
-          v-model="settings.credential.username"
+          v-model="settings.credentials.username"
           :label="$vuetify.locale.getScope().t('$vuetify.settings.username')"
           :rules="[v => !!v || 'Username is required']"
         />
         <v-text-field
-          v-model="settings.credential.password"
+          v-model="settings.credentials.password"
           :label="$vuetify.locale.getScope().t('$vuetify.settings.password')"
           type="password"
           :rules="[v => !!v || 'Password is required']"
@@ -76,7 +76,38 @@
       </v-card-actions>
     </v-card>
 
-    <v-card>
+    <v-card class="mb-3">
+      <v-list>
+        <v-list-subheader>Réglage</v-list-subheader>
+        <v-list-item>
+          <v-list-item-avatar start><v-icon>mdi-clock</v-icon></v-list-item-avatar>
+          <v-list-item-header>
+            <v-list-item-title>
+              {{$vuetify.locale.getScope().t('$vuetify.settings.alarm.title')}}
+            </v-list-item-title>
+            <v-slider
+            v-model="settings.checkResultsInterval"
+            show-ticks="always"
+            hide-details
+            :min="5"
+            :max="60"
+            :step="5"
+            />
+            <v-list-item-subtitle>
+              {{
+                $vuetify.locale.getScope()
+                  .t('$vuetify.settings.alarm.data', settings.checkResultsInterval)
+              }}
+            </v-list-item-subtitle>
+          </v-list-item-header>
+        </v-list-item>
+      </v-list>
+      <v-card-actions>
+        <v-btn color="primary" @click="save">{{$vuetify.locale.getScope().t('$vuetify.settings.save')}}</v-btn>
+      </v-card-actions>
+    </v-card>
+
+    <v-card class="mb-3">
       <v-list>
         <v-list-subheader>Informations</v-list-subheader>
         <v-list-item>
@@ -101,13 +132,14 @@
 
 import getStorageRef from '@/store/Storage';
 import { UserInfo } from '@/core/Gaps';
-import { onUnmounted, ref } from 'vue';
+import { onUnmounted, ref } from 'vue'
 
 const settings = ref({
-  credential: {
+  credentials: {
     username: '',
     password: '',
   },
+  checkResultsInterval: 10,
 });
 
 const getManifest = () => chrome.runtime.getManifest();
@@ -123,13 +155,9 @@ onUnmounted(() => {
 });
 
 async function save() {
-  const { username, password } = settings.value.credential
   chrome.runtime.sendMessage({
     type: 'saveSettings',
-    payload: {
-      username,
-      password,
-    },
+    payload: settings.value,
   })
 }
 
