@@ -21,6 +21,10 @@
               @click.stop.prevent="checkCourse(course.uuid)"
             />
             {{course.name}}
+            <v-chip variant="outlined" class="ml-1 text-uppercase" size="x-small" :ripple="false" v-if="course.hasExam">
+              <v-icon start icon="mdi-note-multiple-outline"></v-icon>
+              examen
+            </v-chip>
             <v-spacer/>
             <v-chip color="primary">{{course.average}}</v-chip>
           </v-expansion-panel-title>

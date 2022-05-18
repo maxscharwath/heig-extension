@@ -225,6 +225,7 @@ export default class GAPS extends TypedEmitter<{
       const $header = $tr.find('td.bigheader');
       if ($header.length > 0) {
         const name = $header.text().trim().split(' - ')[0];
+        const hasExam = $header.text().trim().toLowerCase().includes('examen');
         const average = +$header.text().trim().split(' : ')[1];
         currentHeader = courses.length;
         courses[currentHeader] = {
@@ -232,6 +233,7 @@ export default class GAPS extends TypedEmitter<{
           name,
           average,
           year,
+          hasExam,
           sections: [],
         };
       }

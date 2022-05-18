@@ -73,7 +73,7 @@ export default class GradesManager extends TypedEmitter<{
             section,
             grade,
           }
-          const hash = objectHash(result);
+          const hash = objectHash(grade);
           tmpGradesHash.add(hash);
           if (!this.gradesHash.has(hash)) {
             newGrades.push(result);

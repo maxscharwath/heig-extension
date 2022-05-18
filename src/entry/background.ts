@@ -1,5 +1,6 @@
 import Gaps from '@/core/Gaps';
 import GradesManager, { NewGrades } from '@/core/manager/GradesManager';
+import settings from '@/store/Settings';
 
 console.log(`Background script loaded at ${new Date().toLocaleString()}`);
 
@@ -67,6 +68,12 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   }
 });
 
+settings.onChange(({ checkResultsInterval }) => {
+  chrome.alarms.create('checkResults', {
+    periodInMinutes: checkResultsInterval,
+  });
+})
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   (async () => {
     console.log('onMessage', request);
@@ -80,12 +87,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         await logout();
         await chrome.action.setBadgeText({ text: '' });
         break;
-      case 'saveSettings':
+      case 'login':
         {
-          const result = await login(payload.credentials);
-          chrome.alarms.create('checkResults', {
-            periodInMinutes: payload.checkResultsInterval,
-          });
+          const result = await login(payload);
           sendResponse({ success: result });
         }
         break;

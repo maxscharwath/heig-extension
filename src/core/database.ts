@@ -1,5 +1,6 @@
 import GUN from 'gun'
 import 'gun/lib/then'
+import { GunHost } from '@/core/env';
 
-const db = GUN(['https://gun.stmx.ch/gun']);
+const db = GUN(GunHost);
 export default db;

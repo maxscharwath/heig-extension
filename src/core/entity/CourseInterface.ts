@@ -5,5 +5,6 @@ export default interface CourseInterface {
   name: string;
   year: number;
   average: number;
+  hasExam: boolean;
   sections: SectionInterface[];
 }

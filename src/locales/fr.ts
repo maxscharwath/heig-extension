@@ -4,6 +4,15 @@ export default {
     menu: 'Menu',
     settings: 'Paramètres',
   },
+  weeks: {
+    monday: 'Lundi',
+    tuesday: 'Mardi',
+    wednesday: 'Mercredi',
+    thursday: 'Jeudi',
+    friday: 'Vendredi',
+    saturday: 'Samedi',
+    sunday: 'Dimanche',
+  },
   grades: {
     lastCheckAt: 'Dernière vérification à',
   },
@@ -20,6 +29,10 @@ export default {
     gapsCredentials: 'Gaps Connexion',
     logout: 'Déconnexion',
     login: 'Connexion',
+    save: 'Enregistrer',
+    language: {
+      title: 'Langue',
+    },
     alarm: {
       title: 'Verification des notes',
       data: 'Toutes les {0} minutes',

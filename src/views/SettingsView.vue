@@ -3,7 +3,7 @@
     <v-card v-if="info" class="mb-3">
       <v-card-header class="d-flex justify-center flex-column">
           <v-avatar size="100">
-            <v-img :src="info.pictureUrl" alt="profile" cover="true"/>
+            <v-img :src="info.pictureUrl" alt="profile" :cover="true"/>
           </v-avatar>
       </v-card-header>
       <v-card-text>
@@ -15,33 +15,33 @@
             <v-expansion-panel-text>
               <v-list>
                 <v-list-item>
-                  <v-list-item-content>
+                  <v-list-item-header>
                     <v-list-item-title>{{$vuetify.locale.getScope().t('$vuetify.settings.email')}}</v-list-item-title>
                     <v-list-item-subtitle>{{ info.email }}</v-list-item-subtitle>
-                  </v-list-item-content>
+                  </v-list-item-header>
                 </v-list-item>
                 <v-list-item>
-                  <v-list-item-content>
+                  <v-list-item-header>
                     <v-list-item-title>{{$vuetify.locale.getScope().t('$vuetify.settings.phone')}}</v-list-item-title>
                     <v-list-item-subtitle>{{ info.phoneNumber }}</v-list-item-subtitle>
-                  </v-list-item-content>
+                  </v-list-item-header>
                 </v-list-item>
                 <v-list-item>
-                  <v-list-item-content>
+                  <v-list-item-header>
                     <v-list-item-title>{{$vuetify.locale.getScope().t('$vuetify.settings.address')}}</v-list-item-title>
                     <v-list-item-subtitle>{{ info.addressStreet }}</v-list-item-subtitle>
                     <v-list-item-subtitle>{{ info.addressCity }}</v-list-item-subtitle>
-                  </v-list-item-content>
+                  </v-list-item-header>
                 </v-list-item>
                 <v-list-item>
-                  <v-list-item-content>
+                  <v-list-item-header>
                     <v-list-item-title>
                       {{$vuetify.locale.getScope().t('$vuetify.settings.birthday')}}
                     </v-list-item-title>
                     <v-list-item-subtitle>
                       {{ new Date(info.birthday).toLocaleDateString() }}
                     </v-list-item-subtitle>
-                  </v-list-item-content>
+                  </v-list-item-header>
                 </v-list-item>
                 <v-list-item>
                   <v-btn color="error" @click="logout">{{$vuetify.locale.getScope().t('$vuetify.settings.logout')}}</v-btn>
@@ -72,7 +72,7 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="error" @click="logout">{{$vuetify.locale.getScope().t('$vuetify.settings.logout')}}</v-btn>
-        <v-btn color="primary" @click="save">{{$vuetify.locale.getScope().t('$vuetify.settings.login')}}</v-btn>
+        <v-btn color="primary" @click="login">{{$vuetify.locale.getScope().t('$vuetify.settings.login')}}</v-btn>
       </v-card-actions>
     </v-card>
 
@@ -101,10 +101,16 @@
             </v-list-item-subtitle>
           </v-list-item-header>
         </v-list-item>
+        <v-list-item>
+          <v-list-item-avatar start><v-icon>mdi-translate</v-icon></v-list-item-avatar>
+          <v-list-item-header>
+            <v-list-item-title>
+              {{$vuetify.locale.getScope().t('$vuetify.settings.language.title')}}
+            </v-list-item-title>
+            <v-select v-model="settings.language" :items="languages"></v-select>
+          </v-list-item-header>
+        </v-list-item>
       </v-list>
-      <v-card-actions>
-        <v-btn color="primary" @click="save">{{$vuetify.locale.getScope().t('$vuetify.settings.save')}}</v-btn>
-      </v-card-actions>
     </v-card>
 
     <v-card class="mb-3">
@@ -112,17 +118,17 @@
         <v-list-subheader>Informations</v-list-subheader>
         <v-list-item>
           <v-list-item-avatar><v-icon>mdi-information</v-icon></v-list-item-avatar>
-          <v-list-item-content>
+          <v-list-item-header>
             <v-list-item-title>Version</v-list-item-title>
             <v-list-item-subtitle>{{getManifest().version}}</v-list-item-subtitle>
-          </v-list-item-content>
+          </v-list-item-header>
         </v-list-item>
       </v-list>
       <v-list-item href="https://github.com/maxscharwath/heig-extension" link target="_blank">
         <v-list-item-avatar><v-icon>mdi-github</v-icon></v-list-item-avatar>
-        <v-list-item-content>
+        <v-list-item-header>
           <v-list-item-title>Source Code</v-list-item-title>
-        </v-list-item-content>
+        </v-list-item-header>
       </v-list-item>
     </v-card>
   </v-container>
@@ -132,17 +138,12 @@
 
 import getStorageRef from '@/store/Storage';
 import { UserInfo } from '@/core/Gaps';
-import { onUnmounted, ref } from 'vue'
-
-const settings = ref({
-  credentials: {
-    username: '',
-    password: '',
-  },
-  checkResultsInterval: 10,
-});
+import { onUnmounted } from 'vue';
+import settings from '@/store/Settings';
 
 const getManifest = () => chrome.runtime.getManifest();
+
+const languages = ['en', 'fr'];
 
 const info = getStorageRef<UserInfo>('info');
 const years = getStorageRef<number[]>('years', {
@@ -154,10 +155,10 @@ onUnmounted(() => {
   years.unlink();
 });
 
-async function save() {
+async function login() {
   chrome.runtime.sendMessage({
-    type: 'saveSettings',
-    payload: settings.value,
+    type: 'login',
+    payload: settings.value.credentials,
   })
 }
 

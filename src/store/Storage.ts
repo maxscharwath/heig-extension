@@ -5,6 +5,7 @@ import StorageArea = chrome.storage.StorageArea;
 
 type StorageRef<T> = Ref<T> & {
   unlink: () => void;
+  onChange: (_cb: (_newValue: T) => void) => void;
 }
 export default function getStorageRef<T = unknown, U = unknown>(
   key: string,
@@ -21,6 +22,7 @@ export default function getStorageRef<T = unknown, U = unknown>(
     };
   } = {},
 ): StorageRef<T> {
+  const events = new EventTarget();
   const storage:StorageArea = storageArea ?? chrome.storage.local;
   const refIntern = ref<T | undefined>(defaultValue) as unknown as StorageRef<T>;
   storage.get(key).then((data) => {
@@ -37,19 +39,24 @@ export default function getStorageRef<T = unknown, U = unknown>(
     if (transformer) {
       v = transformer.from(v);
     }
-    if (refIntern.value !== v) refIntern.value = v;
+    refIntern.value = v;
   }
   chrome.storage.onChanged.addListener(listener);
-  const watcher = watch(refIntern, (v, oldV) => {
+  const watcher = watch(refIntern, async (v) => {
     const rawV = toRaw(v);
-    const rawOldV = toRaw(oldV);
-    console.log('Watch', key, rawV, rawOldV);
-    if (rawV === rawOldV) return;
-    storage.set({ [key]: transformer ? transformer.to(rawV) : rawV });
+    await storage.set({ [key]: transformer ? transformer.to(rawV) : rawV })
+    events.dispatchEvent(new CustomEvent('change', { detail: rawV }));
+  }, {
+    deep: true,
   });
   refIntern.unlink = () => {
     chrome.storage.onChanged.removeListener(listener);
     watcher();
+  }
+  refIntern.onChange = (cb) => {
+    const c = (evt:Event) => cb((<CustomEvent>evt).detail);
+    events.addEventListener('change', c);
+    return () => events.removeEventListener('change', c);
   }
   return refIntern;
 }
