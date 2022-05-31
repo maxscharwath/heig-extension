@@ -115,7 +115,6 @@ async function rateMenu(hash: string, rating: number) {
   if (!uuid) return;
   const data = { ratings: { [objectHash(uuid)]: rating } };
   ratings.get(hash).put(data);
-  console.log(data);
 }
 
 function registerRating(menu: Menu):Menu {
@@ -127,7 +126,6 @@ function registerRating(menu: Menu):Menu {
         value: rates.reduce((a, b) => a + b, 0) / rates.length,
         count: rates.length,
       };
-      console.log(`Menu ${menu.hash} rated ${menu.rating.value} with ${menu.rating.count} votes`);
     }, true);
   return menu;
 }

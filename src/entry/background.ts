@@ -25,7 +25,7 @@ async function checkResults() {
       years.value = await gaps.getYearAvailable();
     }
     const result = await gaps.getResults(years.value[0]);
-    manager.addCourses(result);
+    await manager.addCourses(result);
   } catch (e) {
     console.error(e);
   }
@@ -62,10 +62,10 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   }
 });
 
-settings.onChange(({ checkResultsInterval }) => {
-  console.log('onChange', checkResultsInterval);
+settings.onChange((data) => {
+  if (!data?.checkResultsInterval) return;
   chrome.alarms.create('checkResults', {
-    periodInMinutes: checkResultsInterval,
+    periodInMinutes: data.checkResultsInterval,
   });
 });
 

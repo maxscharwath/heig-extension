@@ -49,6 +49,12 @@ export default class GradesManager extends TypedEmitter<{
   private newGradesNotification = useStorage<NewGrades>({
     id: 'newGrades',
     defaultState: {},
+    onChange: async (newValue) => {
+      const nbNewGrades = Object.values(newValue ?? {}).length
+      await chrome.action.setBadgeText({
+        text: nbNewGrades > 0 ? `${nbNewGrades}` : '',
+      });
+    },
   });
 
   public getCourses(): CourseInterface[] {

@@ -1,6 +1,6 @@
 import {
-  ref, Ref, UnwrapNestedRefs, UnwrapRef, watch,
-} from 'vue';
+  ref, Ref, UnwrapRef, watch,
+} from 'vue'
 import { nanoid } from 'nanoid';
 
 export type Nullable<T> = T | null;
@@ -8,7 +8,7 @@ export type Nullable<T> = T | null;
 type ChromeStorageAddons<T> = {
   error: Ref<Nullable<string>>;
   unlink: () => void;
-  onChange: (_cb: (_newValue: UnwrapNestedRefs<T>) => void) => void;
+  onChange: (_cb: (_newValue: UnwrapRef<Nullable<T>>) => void) => void;
 }
 export type ChromeStorage<T> = Ref<UnwrapRef<T> | null> & ChromeStorageAddons<T>;
 
@@ -20,6 +20,7 @@ export interface ChromeStorageOptions<Id extends string, Value, U> {
     from: (_value: U) => UnwrapRef<Nullable<Value>>,
     to: (_value: UnwrapRef<Value>) => U,
   };
+  onChange?: (_newValue: UnwrapRef<Nullable<Value>>) => void;
 }
 
 const uuid = nanoid();
@@ -30,12 +31,14 @@ export function useStorage<Value = unknown, U = unknown, Id extends string = str
     defaultState,
     storageArea = 'local',
     transformer,
+    onChange,
   }: ChromeStorageOptions<Id, Value, U>,
 ): ChromeStorage<Value> {
   const state = ref<Nullable<Value>>(defaultState ?? null);
   const error = ref<Nullable<string>>(null);
   const events = new EventTarget();
   const unwatch = watch(state, async (currentState) => {
+    onChange?.(currentState);
     events.dispatchEvent(new CustomEvent('change', { detail: currentState }));
     const data = currentState ? transformer?.to(currentState) ?? currentState : null;
     if (JSON.stringify(data) === JSON.stringify((await chrome.storage[storageArea].get(id))[id]?.data)) {
@@ -65,7 +68,6 @@ export function useStorage<Value = unknown, U = unknown, Id extends string = str
     if (newValue?.uuid === uuid) { return; }
     const tmpState = transformer?.from(newValue.data) ?? newValue.data;
     if (JSON.stringify(tmpState) === JSON.stringify(state.value)) { return; }
-    console.log('Loaded', uuid, newValue);
     state.value = tmpState;
   };
   chrome.storage.onChanged.addListener(chromeListener);
@@ -73,7 +75,6 @@ export function useStorage<Value = unknown, U = unknown, Id extends string = str
   // Initial data retrieval
   chrome.storage[storageArea].get(id, (items) => {
     if (items[id]?.uuid !== uuid && items[id]?.data) {
-      console.log('Retrieved', items[id].data);
       state.value = transformer?.from(items[id].data) ?? items[id].data;
     }
   });

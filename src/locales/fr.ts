@@ -15,11 +15,13 @@ export default {
   },
   grades: {
     lastCheckAt: 'Dernière vérification à',
+    hasExam: 'A un examen',
   },
   menu: {
     menuOfDay: 'Menu du jour',
   },
   settings: {
+    title: 'Réglages',
     email: 'Email',
     password: 'Mot de passe',
     username: 'Nom d\'utilisateur',

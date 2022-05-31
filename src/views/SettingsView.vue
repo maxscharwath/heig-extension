@@ -80,12 +80,12 @@
       </v-card-title>
       <v-card-content>
         <v-text-field
-          v-model.trim="settings.credentials.username"
+          v-model.trim.lazy="settings.credentials.username"
           :label="$vuetify.locale.getScope().t('$vuetify.settings.username')"
           :rules="[v => !!v || 'Username is required']"
         />
         <v-text-field
-          v-model.trim="settings.credentials.password"
+          v-model.trim.lazy="settings.credentials.password"
           :label="$vuetify.locale.getScope().t('$vuetify.settings.password')"
           :rules="[v => !!v || 'Password is required']"
           type="password"
@@ -108,7 +108,7 @@
 
     <v-card class="mb-3">
       <v-list>
-        <v-list-subheader>Réglage</v-list-subheader>
+        <v-list-subheader>{{ $vuetify.locale.getScope().t('$vuetify.settings.title') }}</v-list-subheader>
         <v-list-item>
           <v-list-item-avatar start>
             <v-icon>mdi-clock</v-icon>
@@ -121,7 +121,7 @@
               }}
             </v-list-item-title>
             <v-slider
-              v-model="settings.checkResultsInterval"
+              v-model.lazy="settings.checkResultsInterval"
               :max="60"
               :min="5"
               :step="5"
@@ -147,7 +147,7 @@
                   .t('$vuetify.settings.language.title')
               }}
             </v-list-item-title>
-            <v-select v-model="settings.language" :items="languages"></v-select>
+            <v-select v-model.lazy="settings.language" :items="languages"></v-select>
           </v-list-item-header>
         </v-list-item>
       </v-list>

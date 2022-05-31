@@ -24,11 +24,12 @@
               @click.stop.prevent="checkCourse(course.uuid)"
             />
             {{ course.name }}
-            <v-chip v-if="course.hasExam" :ripple="false" class="ml-1 text-uppercase" size="x-small"
-                    variant="outlined">
-              <v-icon icon="mdi-note-multiple-outline" start></v-icon>
-              examen
-            </v-chip>
+            <v-tooltip v-if="course.hasExam">
+              <template v-slot:activator="{ props }">
+                <v-icon size="x-small" icon="mdi-school" end  v-bind="props"/>
+              </template>
+              <span>{{$vuetify.locale.getScope().t('$vuetify.grades.hasExam')}}</span>
+            </v-tooltip>
             <v-spacer/>
             <v-chip color="primary">{{ course.average }}</v-chip>
           </v-expansion-panel-title>
