@@ -64,11 +64,14 @@ const info = useStorage<UserInfo>({
 });
 const showWeek = ref(false);
 
-export interface Menu {
+interface MenuBase {
   starter: string;
   mainCourse: string[];
   dessert: string;
   containsPork: boolean;
+}
+
+export interface Menu extends MenuBase {
   hash: string;
   rating: {
     value: number;
@@ -108,10 +111,25 @@ const menus = computed(() => {
 const ratings = db.get('menu_ratings');
 
 async function rateMenu(hash: string, rating: number) {
-  const uuid = info.value.id;
+  const uuid = info.value?.id;
   if (!uuid) return;
-  ratings.get(hash)
-    .put({ ratings: { [uuid]: rating } });
+  const data = { ratings: { [objectHash(uuid)]: rating } };
+  ratings.get(hash).put(data);
+  console.log(data);
+}
+
+function registerRating(menu: Menu):Menu {
+  ratings.get(menu.hash)
+    .get('ratings')
+    .on(({ _, ...r }) => {
+      const rates: number[] = Object.values(r);
+      menu.rating = {
+        value: rates.reduce((a, b) => a + b, 0) / rates.length,
+        count: rates.length,
+      };
+      console.log(`Menu ${menu.hash} rated ${menu.rating.value} with ${menu.rating.count} votes`);
+    }, true);
+  return menu;
 }
 
 async function fetchWeekMenu() {
@@ -121,62 +139,35 @@ async function fetchWeekMenu() {
     },
   });
   const data = (await response.json()) as MenuWeekResponse;
-  data.days.forEach((item) => {
-    item.menus = item.menus.map((menu) => {
-      const m = {
-        ...menu,
-        hash: objectHash(menu),
-        rating: {
-          value: 0,
-          count: 0,
-        },
-      };
-      ratings.get(m.hash)
-        .get('ratings')
-        .on(({
-          _,
-          ...r
-        }) => {
-          const rates: number[] = Object.values(r);
-          m.rating = {
-            value: rates.reduce((a, b) => a + b, 0) / rates.length,
-            count: rates.length,
-          };
-        }, true);
-      return m;
-    });
-  });
-  menusWeek.value = data.days;
-}
-
-async function fetchMenu(): Promise<MenuResponse> {
-  const response = await fetch('https://apix.blacktree.io/top-chef/today');
-  const data = (await response.json()) as MenuResponse;
-  data.menus = data.menus.map((menu) => {
-    const m = {
+  menusWeek.value = data.days.map((day) => ({
+    ...day,
+    menus: day.menus.map((menu) => ({
       ...menu,
       hash: objectHash(menu),
       rating: {
         value: 0,
         count: 0,
       },
-    };
-    ratings.get(m.hash)
-      .get('ratings')
-      .on(({
-        _,
-        ...r
-      }) => {
-        const rates: number[] = Object.values(r);
-        m.rating = {
-          value: rates.reduce((a, b) => a + b, 0) / rates.length,
-          count: rates.length,
-        };
-      }, true);
-    return m;
-  });
-  menusToday.value = data;
-  return data;
+    })),
+  }));
+  menusWeek.value.forEach((day) => day.menus.forEach(registerRating));
+}
+
+async function fetchMenu() {
+  const response = await fetch('https://apix.blacktree.io/top-chef/today');
+  const data = (await response.json()) as MenuResponse;
+  menusToday.value = {
+    ...data,
+    menus: data.menus.map((menu) => ({
+      ...menu,
+      hash: objectHash(menu),
+      rating: {
+        value: 0,
+        count: 0,
+      },
+    })),
+  };
+  menusToday.value.menus.forEach(registerRating);
 }
 
 function fetchMenuAll() {
@@ -193,5 +184,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   info.unlink();
+  ratings.off();
 });
 </script>
