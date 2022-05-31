@@ -1,29 +1,31 @@
 <template>
   <v-locale-provider :locale="settings.language">
-  <v-app theme="dark" class="app">
-    <v-app-bar>
+    <v-app class="app" theme="dark">
+      <v-app-bar>
         <v-tabs
-          stacked
           grow
+          stacked
           style="width: 100%"
         >
           <v-tab v-for="route in routes" :key="route.path" :to="route.path">
             <v-icon>{{ route.icon }}</v-icon>
-            {{ $vuetify.locale.getScope().t(route.i18n) }}
+            {{
+              $vuetify.locale.getScope()
+                .t(route.i18n)
+            }}
           </v-tab>
         </v-tabs>
-    </v-app-bar>
-    <v-main>
+      </v-app-bar>
+      <v-main>
         <router-view/>
-    </v-main>
-  </v-app>
+      </v-main>
+    </v-app>
   </v-locale-provider>
 </template>
 
 <script lang="ts" setup>
-import { routes } from '@/router'
-import settings from '@/store/Settings'
-</script>
+import { routes } from '@/router';
+import settings from '@/store/Settings'; </script>
 
 <style scoped>
 .app {

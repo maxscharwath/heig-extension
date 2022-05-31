@@ -6,12 +6,14 @@ export default class CheerioResponse extends Response {
 
   constructor(body: BodyInit | null, init?: ResponseInit, $?: CheerioAPI) {
     super(body, init);
-    if ($) this.$ = $;
-    else if (body) this.$ = cheerio.load(body as string);
+    if ($) {
+      this.$ = $;
+    } else if (body) this.$ = cheerio.load(body as string);
   }
 
   static async from(response: Response): Promise<CheerioResponse> {
-    const data = await response.clone().text();
+    const data = await response.clone()
+      .text();
     return new CheerioResponse(data, response);
   }
 

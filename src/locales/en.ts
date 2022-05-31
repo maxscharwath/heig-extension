@@ -38,4 +38,4 @@ export default {
       data: 'Every {0} minutes',
     },
   },
-}
+};

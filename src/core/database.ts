@@ -1,5 +1,5 @@
-import GUN from 'gun'
-import 'gun/lib/then'
+import GUN from 'gun';
+import 'gun/lib/then';
 import { GunHost } from '@/core/env';
 
 const db = GUN(GunHost);

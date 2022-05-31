@@ -1,8 +1,9 @@
-import objectHash from 'object-hash'
-import { TypedEmitter } from 'tiny-typed-emitter'
-import CourseInterface from '@/core/entity/CourseInterface'
-import GradeInterface from '@/core/entity/GradeInterface'
-import SectionInterface from '@/core/entity/SectionInterface'
+import objectHash from 'object-hash';
+import { TypedEmitter } from 'tiny-typed-emitter';
+import CourseInterface from '@/core/entity/CourseInterface';
+import GradeInterface from '@/core/entity/GradeInterface';
+import SectionInterface from '@/core/entity/SectionInterface';
+import { useStorage } from '@/store/useStorage';
 
 export type Grade = {
   course: Omit<CourseInterface, 'sections'>,
@@ -22,40 +23,45 @@ export default class GradesManager extends TypedEmitter<{
   newGrades: (_grades: Grade[]) => void;
   onUpdate: () => void;
 }> {
-  private gradesHash = new Set<string>();
+  private gradesHash = useStorage({
+    id: 'gradesHash',
+    defaultState: new Set<string>(),
+    transformer: {
+      from: (value: string[]): Set<string> => new Set(value),
+      to: (value: Set<string>): string[] => [...value],
+    },
+  });
 
-  private gradesData: CourseInterface[] = [];
+  private gradesData = useStorage<CourseInterface[]>({
+    id: 'gradesData',
+    defaultState: [],
+  });
 
-  private updatedAt?: Date;
+  private updatedAt = useStorage<Date, string>({
+    id: 'updatedAt',
+    defaultState: new Date(0),
+    transformer: {
+      from: (value: string): Date => new Date(value),
+      to: (value: Date): string => value.toISOString(),
+    },
+  });
 
-  constructor() {
-    super()
-    chrome.storage.local.get(['gradesHash', 'gradesData'], ({ gradesHash, gradesData }) => {
-      console.log('GradesManager: constructor', gradesHash, gradesData)
-      this.gradesHash = new Set(gradesHash ?? []);
-      this.gradesData = gradesData ?? [];
-    })
-  }
-
-  public clear() {
-    this.gradesHash.clear();
-    this.gradesData = [];
-    this.updatedAt = undefined;
-    chrome.storage.local.set({ gradesHash: [], gradesData: [] }).finally()
-  }
+  private newGradesNotification = useStorage<NewGrades>({
+    id: 'newGrades',
+    defaultState: {},
+  });
 
   public getCourses(): CourseInterface[] {
-    return this.gradesData;
+    return this.gradesData.value ?? [];
   }
 
-  public getUpdatedAt(): Date | undefined {
-    return this.updatedAt;
+  public getUpdatedAt(): Date {
+    return this.updatedAt.value ?? new Date(0);
   }
 
   public async addCourses(courses: CourseInterface[]) {
     const newGrades: Grade[] = [];
     const tmpGradesHash = new Set<string>();
-    const newGradesNotification:NewGrades = (await chrome.storage.local.get('newGrades')).newGrades ?? {};
     courses.forEach(({
       sections,
       ...course
@@ -72,30 +78,25 @@ export default class GradesManager extends TypedEmitter<{
             course,
             section,
             grade,
-          }
+          };
           const hash = objectHash(grade);
           tmpGradesHash.add(hash);
-          if (!this.gradesHash.has(hash)) {
+          if (!this.gradesHash.value?.has(hash)) {
             newGrades.push(result);
-            newGradesNotification[grade.uuid] = [course.uuid, section.uuid, grade.uuid];
+            if (this.newGradesNotification.value) {
+              this.newGradesNotification.value[grade.uuid] = [course.uuid, section.uuid, grade.uuid];
+            }
             this.emit('newGrade', result);
           }
-        })
-      })
-    })
-    this.gradesData = courses;
-    this.updatedAt = new Date();
-    this.gradesHash = tmpGradesHash;
+        });
+      });
+    });
+    this.gradesData.value = courses;
+    this.updatedAt.value = new Date();
+    this.gradesHash.value = tmpGradesHash;
     this.emit('onUpdate');
-    chrome.storage.local.set({
-      updatedAt: this.updatedAt.toISOString(),
-      newGrades: newGradesNotification,
-      gradesHash: [...this.gradesHash],
-      gradesData: courses,
-    })
-      .finally()
     if (newGrades.length > 0) {
-      this.emit('newGrades', newGrades)
+      this.emit('newGrades', newGrades);
     }
     console.log(`GradesManager: addCourses: ${newGrades.length} new grades`);
   }

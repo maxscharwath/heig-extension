@@ -1,7 +1,8 @@
-import getStorageRef from '@/store/Storage';
+import { useStorage } from '@/store/useStorage';
 
-export default getStorageRef('settings', {
-  defaultValue: {
+export default useStorage({
+  id: 'settings',
+  defaultState: {
     credentials: {
       username: '',
       password: '',

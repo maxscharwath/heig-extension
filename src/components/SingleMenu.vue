@@ -1,37 +1,41 @@
 <template>
   <v-card
-    class="text-center mb-3"
     v-if="!!menu.starter || !!menu.dessert || !!menu.mainCourse.join()"
+    class="text-center mb-3"
   >
     <v-card-header class="d-flex justify-center">
       <div>
-        <div class="text-overline">{{menu.starter}}</div>
+        <div class="text-overline">{{ menu.starter }}</div>
         <v-divider/>
-        <div class="text-h6">{{menu.mainCourse[0]}}</div>
-        <div class="text-overline">{{menu.mainCourse.slice(1).join('\n')}}</div>
+        <div class="text-h6">{{ menu.mainCourse[0] }}</div>
+        <div class="text-overline">{{
+            menu.mainCourse.slice(1)
+              .join('\n')
+          }}
+        </div>
         <v-divider/>
-        <div class="text-overline">{{menu.dessert}}</div>
+        <div class="text-overline">{{ menu.dessert }}</div>
       </div>
     </v-card-header>
     <v-card-actions class="d-flex justify-center">
-      {{menu.rating.count}}
+      {{ menu.rating.count }}
       <v-rating
         v-model="menu.rating.value"
-        @change="$emit('rate',menu.hash,menu.rating.value)"
+        color="red"
+        density="comfortable"
         empty-icon="mdi-heart-outline"
         full-icon="mdi-heart"
         half-icon="mdi-heart-half-full"
         half-increments
         hover
         length="5"
-        density="comfortable"
-        color="red"
+        @change="$emit('rate',menu.hash,menu.rating.value)"
       ></v-rating>
     </v-card-actions>
   </v-card>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { PropType, toRef } from 'vue';
 
 interface Menu {

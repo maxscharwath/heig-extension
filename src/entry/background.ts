@@ -1,33 +1,30 @@
-import Gaps from '@/core/Gaps';
-import GradesManager, { NewGrades } from '@/core/manager/GradesManager';
+import Gaps, { UserInfo } from '@/core/Gaps';
+import GradesManager from '@/core/manager/GradesManager';
 import settings from '@/store/Settings';
+import { useStorage } from '@/store/useStorage';
 
 console.log(`Background script loaded at ${new Date().toLocaleString()}`);
 
 const gaps = new Gaps();
 const manager = new GradesManager();
-chrome.storage.onChanged.addListener(async (changes) => {
-  if (changes.newGrades) {
-    const newGrades:NewGrades = changes.newGrades.newValue;
-    if (newGrades) {
-      const nbGrades = Object.values(newGrades).length;
-      await chrome.action.setBadgeText({ text: nbGrades > 0 ? `${nbGrades}` : '' });
-    }
-  }
+
+const info = useStorage<UserInfo>({ id: 'info' });
+const years = useStorage<number[]>({
+  id: 'years',
+  defaultState: [],
 });
 
 async function checkResults() {
   console.log('checkResults');
   try {
-    const storageData = await chrome.storage.local.get(['years', 'credentials']);
-    if (!await gaps.autoLogin(storageData.credentials)) {
+    if (!await gaps.autoLogin(settings.value?.credentials)) {
       console.log('autoLogin failed');
       return;
     }
-    if (!storageData.years) {
-      storageData.years = await gaps.getYearAvailable();
+    if (!years.value) {
+      years.value = await gaps.getYearAvailable();
     }
-    const result = await gaps.getResults(storageData.years[0]);
+    const result = await gaps.getResults(years.value[0]);
     manager.addCourses(result);
   } catch (e) {
     console.error(e);
@@ -45,11 +42,8 @@ async function login(credentials: { username: string, password: string }) {
     console.log('login');
     await logout();
     await gaps.loginCredentials(credentials);
-    await chrome.storage.local.set({
-      credentials,
-      info: await gaps.getInfo(),
-      years: await gaps.getYearAvailable(),
-    });
+    years.value = await gaps.getYearAvailable();
+    info.value = await gaps.getInfo();
   } catch (e) {
     console.error(e);
     return false;
@@ -69,10 +63,11 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 });
 
 settings.onChange(({ checkResultsInterval }) => {
+  console.log('onChange', checkResultsInterval);
   chrome.alarms.create('checkResults', {
     periodInMinutes: checkResultsInterval,
   });
-})
+});
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   (async () => {
@@ -87,11 +82,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         await logout();
         await chrome.action.setBadgeText({ text: '' });
         break;
-      case 'login':
-        {
-          const result = await login(payload);
-          sendResponse({ success: result });
-        }
+      case 'login': {
+        const result = await login(payload);
+        sendResponse({ success: result });
+      }
         break;
       default:
         sendResponse({});
