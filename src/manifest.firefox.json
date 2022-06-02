@@ -1,0 +1,33 @@
+{
+  "manifest_version": 2,
+  "name": "HEIG-VD Extension",
+  "description": "HEIG-VD extension is useful if you are a student at HEIG-VD",
+  "version": "0.0.4",
+  "background": {
+    "scripts": [
+      "/background.js"
+    ]
+  },
+  "browser_action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "/content.js"
+      ]
+    }
+  ],
+  "options_page": "options.html",
+  "permissions": [
+    "alarms",
+    "storage",
+    "cookies",
+    "https://apix.blacktree.io/*",
+    "*://*.heig-vd.ch/*",
+    "*://gun.stmx.ch/*"
+  ]
+}

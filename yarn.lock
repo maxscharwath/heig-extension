@@ -1331,6 +1331,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/webextension-polyfill@^0.9.0":
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/@types/webextension-polyfill/-/webextension-polyfill-0.9.0.tgz#a50b5f03161ef83e46721719b49668cfcaac804a"
+  integrity sha512-HG1y1o2hK8ag6Y7dfkrAbfKmMIP+B0E6SwAzUfmQ1dDxEIdLTtMyrStY26suHBPrAL7Xw/chlDW02ugc3uXWtQ==
+
 "@types/webfontloader@^1.0.0":
   version "1.6.34"
   resolved "https://registry.yarnpkg.com/@types/webfontloader/-/webfontloader-1.6.34.tgz#3ad1530c3cf2827d3ed80679b4f8c688e6c6957c"
@@ -2990,6 +2995,13 @@ deep-is@^0.1.3:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/deep-is/-/deep-is-0.1.4.tgz#a6f2dce612fadd2ef1f519b73551f17e85199831"
   integrity sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==
+
+deepcopy@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/deepcopy/-/deepcopy-2.1.0.tgz#2deb0dd52d079c2ecb7924b640a7c3abd4db1d6d"
+  integrity sha512-8cZeTb1ZKC3bdSCP6XOM1IsTczIO73fdqtwa2B0N15eAz7gmyhQo+mc5gnFuulsgN3vIQYmTgbmQVKalH1dKvQ==
+  dependencies:
+    type-detect "^4.0.8"
 
 deepmerge@^1.5.2:
   version "1.5.2"
@@ -6750,6 +6762,11 @@ type-check@^0.4.0, type-check@~0.4.0:
   dependencies:
     prelude-ls "^1.2.1"
 
+type-detect@^4.0.8:
+  version "4.0.8"
+  resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
+  integrity sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
+
 type-fest@^0.20.2:
   version "0.20.2"
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.20.2.tgz#1bf207f4b28f91583666cb5fbd327887301cd5f4"
@@ -6998,6 +7015,11 @@ webcrypto-core@^1.7.4:
     asn1js "^3.0.1"
     pvtsutils "^1.3.2"
     tslib "^2.4.0"
+
+webextension-polyfill@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/webextension-polyfill/-/webextension-polyfill-0.9.0.tgz#de6c1941d0ef1b0858b20e9c7b46bbc042c5a960"
+  integrity sha512-LTtHb0yR49xa9irkstDxba4GATDAcDw3ncnFH9RImoFwDlW47U95ME5sn5IiQX2ghfaECaf6xyXM8yvClIBkkw==
 
 webfontloader@^1.0.0:
   version "1.6.28"

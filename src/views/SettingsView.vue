@@ -108,7 +108,11 @@
 
     <v-card class="mb-3">
       <v-list>
-        <v-list-subheader>{{ $vuetify.locale.getScope().t('$vuetify.settings.title') }}</v-list-subheader>
+        <v-list-subheader>{{
+            $vuetify.locale.getScope()
+              .t('$vuetify.settings.title')
+          }}
+        </v-list-subheader>
         <v-list-item>
           <v-list-item-avatar start>
             <v-icon>mdi-clock</v-icon>
@@ -180,36 +184,40 @@
 
 <script lang="ts" setup>
 
-import { UserInfo } from '@/core/Gaps';
-import { onUnmounted } from 'vue';
-import settings from '@/store/Settings';
-import { useStorage } from '@/store/useStorage';
+import { UserInfo } from '@/core/Gaps'
+import { onUnmounted } from 'vue'
+import settings from '@/store/Settings'
+import { useStorage } from '@/store/useStorage'
+import browser from 'webextension-polyfill'
 
-const getManifest = () => chrome.runtime.getManifest();
+const getManifest = () => browser.runtime.getManifest()
 
-const languages = ['en', 'fr'];
+const languages = ['en', 'fr']
 
-const info = useStorage<UserInfo>({ id: 'info' });
+const info = useStorage<UserInfo>({ id: 'info' })
 const years = useStorage<number[]>({
   id: 'years',
   defaultState: [],
-});
+})
 
 onUnmounted(() => {
-  info.unlink();
-  years.unlink();
-});
+  info.unlink()
+  years.unlink()
+})
 
 async function login() {
-  chrome.runtime.sendMessage({
+  await browser.runtime.sendMessage({
     type: 'login',
-    payload: settings.value?.credentials,
-  });
+    payload: {
+      username: settings.value?.credentials.username,
+      password: settings.value?.credentials.password,
+    },
+  })
 }
 
 async function logout() {
-  chrome.runtime.sendMessage({
+  await browser.runtime.sendMessage({
     type: 'clear',
-  });
+  })
 }
 </script>

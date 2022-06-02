@@ -40,4 +40,4 @@ export default {
       data: 'Toutes les {0} minutes',
     },
   },
-};
+}

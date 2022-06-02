@@ -6,14 +6,14 @@
       }}
     </v-app-bar-title>
     <v-spacer></v-spacer>
-    <v-btn icon @click="showWeek=!showWeek">
+    <v-btn icon size="small" @click="showWeek=!showWeek">
       <v-icon>mdi-calendar-range</v-icon>
     </v-btn>
-    <v-btn icon @click="fetchMenuAll">
+    <v-btn icon size="small" @click="fetchMenuAll">
       <v-icon>mdi-refresh</v-icon>
     </v-btn>
     <template v-if="showWeek" v-slot:extension>
-      <v-tabs v-model="selectedDay" align-with-title center-active style="width: 100%">
+      <v-tabs v-model="selectedDay" center-active centered class="w-100">
         <v-tab>{{
             $vuetify.locale.getScope()
               .t('$vuetify.weeks.monday')
@@ -42,27 +42,27 @@
       </v-tabs>
     </template>
   </v-app-bar>
-  <v-progress-linear v-if="loading" indeterminate="true"/>
+  <v-progress-linear v-if="loading" :indeterminate="true"/>
   <v-container v-if="menus" fluid>
     <SingleMenu v-for="(menu,index) in menus.menus" :key="index" :menu="menu" @rate="rateMenu"/>
   </v-container>
 </template>
 
 <script lang="ts" setup>
-import objectHash from 'object-hash';
+import objectHash from 'object-hash'
 import {
   computed, onMounted, onUnmounted, ref,
-} from 'vue';
-import db from '@/core/database';
-import { UserInfo } from '@/core/Gaps';
-import SingleMenu from '@/components/SingleMenu.vue';
-import { TopChefAPI } from '@/core/env';
-import { useStorage } from '@/store/useStorage';
+} from 'vue'
+import db from '@/core/database'
+import { UserInfo } from '@/core/Gaps'
+import SingleMenu from '@/components/SingleMenu.vue'
+import { TopChefAPI } from '@/core/env'
+import { useStorage } from '@/store/useStorage'
 
 const info = useStorage<UserInfo>({
   id: 'info',
-});
-const showWeek = ref(false);
+})
+const showWeek = ref(false)
 
 interface MenuBase {
   starter: string;
@@ -96,38 +96,42 @@ interface MenuWeekResponse {
   lastNotify: string;
 }
 
-const menusToday = ref<MenuResponse>();
-const menusWeek = ref<MenuResponse[]>([]);
-const selectedDay = ref<number>(0);
-const loading = ref(false);
+const menusToday = ref<MenuResponse>()
+const menusWeek = ref<MenuResponse[]>([])
+const selectedDay = ref<number>(0)
+const loading = ref(false)
 
 const menus = computed(() => {
   if (showWeek.value && menusWeek.value[selectedDay.value]) {
-    return menusWeek.value[selectedDay.value];
+    return menusWeek.value[selectedDay.value]
   }
-  return menusToday.value;
-});
+  return menusToday.value
+})
 
-const ratings = db.get('menu_ratings');
+const ratings = db.get('menu_ratings')
 
 async function rateMenu(hash: string, rating: number) {
-  const uuid = info.value?.id;
-  if (!uuid) return;
-  const data = { ratings: { [objectHash(uuid)]: rating } };
-  ratings.get(hash).put(data);
+  const uuid = info.value?.id
+  if (!uuid) return
+  const data = { ratings: { [objectHash(uuid)]: rating } }
+  ratings.get(hash)
+    .put(data)
 }
 
-function registerRating(menu: Menu):Menu {
+function registerRating(menu: Menu): Menu {
   ratings.get(menu.hash)
     .get('ratings')
-    .on(({ _, ...r }) => {
-      const rates: number[] = Object.values(r);
+    .on(({
+      _,
+      ...r
+    }) => {
+      const rates: number[] = Object.values(r)
       menu.rating = {
         value: rates.reduce((a, b) => a + b, 0) / rates.length,
         count: rates.length,
-      };
-    }, true);
-  return menu;
+      }
+    }, true)
+  return menu
 }
 
 async function fetchWeekMenu() {
@@ -135,8 +139,8 @@ async function fetchWeekMenu() {
     headers: {
       'x-api-key': TopChefAPI,
     },
-  });
-  const data = (await response.json()) as MenuWeekResponse;
+  })
+  const data = (await response.json()) as MenuWeekResponse
   menusWeek.value = data.days.map((day) => ({
     ...day,
     menus: day.menus.map((menu) => ({
@@ -147,13 +151,13 @@ async function fetchWeekMenu() {
         count: 0,
       },
     })),
-  }));
-  menusWeek.value.forEach((day) => day.menus.forEach(registerRating));
+  }))
+  menusWeek.value.forEach((day) => day.menus.forEach(registerRating))
 }
 
 async function fetchMenu() {
-  const response = await fetch('https://apix.blacktree.io/top-chef/today');
-  const data = (await response.json()) as MenuResponse;
+  const response = await fetch('https://apix.blacktree.io/top-chef/today')
+  const data = (await response.json()) as MenuResponse
   menusToday.value = {
     ...data,
     menus: data.menus.map((menu) => ({
@@ -164,24 +168,24 @@ async function fetchMenu() {
         count: 0,
       },
     })),
-  };
-  menusToday.value.menus.forEach(registerRating);
+  }
+  menusToday.value.menus.forEach(registerRating)
 }
 
 function fetchMenuAll() {
-  loading.value = true;
+  loading.value = true
   Promise.allSettled([fetchMenu(), fetchWeekMenu()])
     .finally(() => {
-      loading.value = false;
-    });
+      loading.value = false
+    })
 }
 
 onMounted(() => {
-  fetchMenuAll();
-});
+  fetchMenuAll()
+})
 
 onUnmounted(() => {
-  info.unlink();
-  ratings.off();
-});
+  info.unlink()
+  ratings.off()
+})
 </script>

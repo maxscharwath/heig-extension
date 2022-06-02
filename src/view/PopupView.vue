@@ -1,35 +1,14 @@
 <template>
-  <v-locale-provider :locale="settings.language">
-    <v-app class="app" theme="dark">
-      <v-app-bar>
-        <v-tabs
-          grow
-          stacked
-          style="width: 100%"
-        >
-          <v-tab v-for="route in routes" :key="route.path" :to="route.path">
-            <v-icon>{{ route.icon }}</v-icon>
-            {{
-              $vuetify.locale.getScope()
-                .t(route.i18n)
-            }}
-          </v-tab>
-        </v-tabs>
-      </v-app-bar>
+  <v-app class="app" theme="dark">
+    <v-locale-provider :locale="settings.language">
+      <NavBar/>
       <v-main>
         <router-view/>
       </v-main>
-    </v-app>
-  </v-locale-provider>
+    </v-locale-provider>
+  </v-app>
 </template>
 
 <script lang="ts" setup>
-import { routes } from '@/router';
-import settings from '@/store/Settings'; </script>
-
-<style scoped>
-.app {
-  min-height: 575px;
-  min-width: 400px;
-}
-</style>
+import settings from '@/store/Settings'
+import NavBar from '@/components/NavBar.vue'</script>

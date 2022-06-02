@@ -13,6 +13,7 @@
     "cheerio": "^1.0.0-rc.11",
     "copy-webpack-plugin": "^11.0.0",
     "core-js": "^3.22.8",
+    "deepcopy": "^2.1.0",
     "gun": "^0.2020.1236",
     "ky": "^0.30.0",
     "nanoid": "^3.3.4",
@@ -22,12 +23,14 @@
     "vue": "^3.2.36",
     "vue-router": "^4.0.15",
     "vuetify": "npm:@vuetify/nightly@next",
+    "webextension-polyfill": "^0.9.0",
     "webfontloader": "^1.0.0",
     "webpack-plugin-vuetify": "^2.0.0-alpha.10"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.188",
     "@types/object-hash": "^2.2.1",
+    "@types/webextension-polyfill": "^0.9.0",
     "@types/webfontloader": "^1.0.0",
     "@typescript-eslint/eslint-plugin": "^5.27.0",
     "@typescript-eslint/parser": "^5.27.0",
