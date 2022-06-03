@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts" setup>
-import { PropType, toRef } from 'vue'
+import { PropType, toRef } from 'vue';
 
 interface Menu {
   starter: string;
@@ -55,8 +55,8 @@ const props = defineProps({
     type: Object as PropType<Menu>,
     required: true,
   },
-})
+});
 
-const menu = toRef(props, 'menu')
+const menu = toRef(props, 'menu');
 
 </script>

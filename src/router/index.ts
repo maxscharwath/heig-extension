@@ -1,5 +1,5 @@
-import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
-import GradeView from '@/views/GradeView.vue'
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
+import GradeView from '@/views/GradeView.vue';
 
 export const routes: Array<RouteRecordRaw & { icon: string, i18n: string }> = [
   {
@@ -23,11 +23,11 @@ export const routes: Array<RouteRecordRaw & { icon: string, i18n: string }> = [
     i18n: '$vuetify.routes.settings',
     component: () => import('@/views/SettingsView.vue'),
   },
-]
+];
 
 const router = createRouter({
   history: createWebHashHistory(),
   routes,
-})
+});
 
-export default router
+export default router;

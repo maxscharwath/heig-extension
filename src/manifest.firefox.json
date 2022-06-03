@@ -3,6 +3,12 @@
   "name": "HEIG-VD Extension",
   "description": "HEIG-VD extension is useful if you are a student at HEIG-VD",
   "version": "0.0.4",
+  "icons": {
+    "16": "icons/x16.png",
+    "32": "icons/x32.png",
+    "48": "icons/x48.png",
+    "128": "icons/x128.png"
+  },
   "background": {
     "scripts": [
       "/background.js"
@@ -11,17 +17,6 @@
   "browser_action": {
     "default_popup": "popup.html"
   },
-  "content_scripts": [
-    {
-      "matches": [
-        "<all_urls>"
-      ],
-      "js": [
-        "/content.js"
-      ]
-    }
-  ],
-  "options_page": "options.html",
   "permissions": [
     "alarms",
     "storage",

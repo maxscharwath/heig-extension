@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const yargs = require('yargs');
 
 // Generate pages object
 const pages = {};
@@ -25,22 +26,30 @@ chromeName.forEach((name) => {
 });
 
 const isDevMode = process.env.NODE_ENV === 'development';
+const { argv } = yargs(process.argv);
+const type = argv.extension ?? 'chrome';
 
+const outputDir = path.join('dist', type);
 module.exports = {
   pages,
   filenameHashing: false,
-
+  outputDir,
   chainWebpack: (config) => {
-    config.plugin('copy').use(require('copy-webpack-plugin'), [
-      {
-        patterns: [
-          {
-            from: path.resolve(`src/manifest.${process.env.NODE_ENV}.json`),
-            to: `${path.resolve('dist')}/manifest.json`,
-          },
-        ],
-      },
-    ]);
+    config.plugin('copy')
+      .use(require('copy-webpack-plugin'), [
+        {
+          patterns: [
+            {
+              from: path.resolve('public/'),
+              to: path.resolve(outputDir),
+            },
+            {
+              from: path.resolve(`src/manifest.${type}.json`),
+              to: `${path.resolve(outputDir)}/manifest.json`,
+            },
+          ],
+        },
+      ]);
   },
 
   configureWebpack: {

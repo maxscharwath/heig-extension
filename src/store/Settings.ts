@@ -1,4 +1,4 @@
-import { useStorage } from '@/store/useStorage'
+import { useStorage } from '@/store/useStorage';
 
 export default useStorage({
   id: 'settings',
@@ -11,4 +11,4 @@ export default useStorage({
     checkResultsInterval: 10,
     language: 'en',
   },
-})
+});

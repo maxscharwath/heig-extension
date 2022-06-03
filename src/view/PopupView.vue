@@ -10,5 +10,5 @@
 </template>
 
 <script lang="ts" setup>
-import settings from '@/store/Settings'
-import NavBar from '@/components/NavBar.vue'</script>
+import settings from '@/store/Settings';
+import NavBar from '@/components/NavBar.vue'; </script>

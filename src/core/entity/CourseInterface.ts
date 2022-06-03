@@ -1,4 +1,4 @@
-import SectionInterface from '@/core/entity/SectionInterface'
+import SectionInterface from '@/core/entity/SectionInterface';
 
 export default interface CourseInterface {
   uuid: string;

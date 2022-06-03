@@ -93,20 +93,20 @@
 </template>
 
 <script lang="ts" setup>
-import { onUnmounted, ref } from 'vue'
-import CourseInterface from '@/core/entity/CourseInterface'
-import { NewGrades } from '@/core/manager/GradesManager'
-import { useStorage } from '@/store/useStorage'
-import browser from 'webextension-polyfill'
+import { onUnmounted, ref } from 'vue';
+import CourseInterface from '@/core/entity/CourseInterface';
+import { NewGrades } from '@/core/manager/GradesManager';
+import { useStorage } from '@/store/useStorage';
+import browser from 'webextension-polyfill';
 
 const result = useStorage<CourseInterface[]>({
   id: 'gradesData',
   defaultState: [],
-})
+});
 const newGrades = useStorage<NewGrades>({
   id: 'newGrades',
   defaultState: {},
-})
+});
 const updateAt = useStorage<Date, string>({
   id: 'updatedAt',
   defaultState: new Date(0),
@@ -114,64 +114,64 @@ const updateAt = useStorage<Date, string>({
     from: (value) => new Date(value ?? 0),
     to: (value) => value.toISOString(),
   },
-})
+});
 
-const loading = ref<boolean>(false)
+const loading = ref<boolean>(false);
 
-const gradeIsNew = (gradeUuid: string) => !!(newGrades.value ?? {})[gradeUuid]
+const gradeIsNew = (gradeUuid: string) => !!(newGrades.value ?? {})[gradeUuid];
 const sectionHasNewGrade = (sectionUuid: string) => Object.values(newGrades.value ?? {})
-  .some((grade) => grade[1] === sectionUuid)
+  .some((grade) => grade[1] === sectionUuid);
 const courseHasNewGrade = (courseUuid: string) => Object.values(newGrades.value ?? {})
-  .some((grade) => grade[0] === courseUuid)
+  .some((grade) => grade[0] === courseUuid);
 
 onUnmounted(() => {
-  updateAt.unlink()
-  result.unlink()
-})
+  updateAt.unlink();
+  result.unlink();
+});
 
 const checkGrade = (gradeUuid: string) => {
   if (!newGrades.value) {
-    return
+    return;
   }
-  delete newGrades.value[gradeUuid]
-  newGrades.value = { ...newGrades.value }
-}
+  delete newGrades.value[gradeUuid];
+  newGrades.value = { ...newGrades.value };
+};
 
 const checkSection = (sectionUuid: string) => {
   Object.entries(newGrades.value ?? {})
     .forEach(([gradeUuid, data]) => {
       if (data[1] === sectionUuid && newGrades.value) {
-        delete newGrades.value[gradeUuid]
+        delete newGrades.value[gradeUuid];
       }
-    })
-  newGrades.value = { ...newGrades.value }
-}
+    });
+  newGrades.value = { ...newGrades.value };
+};
 
 const checkCourse = (courseUuid: string) => {
   Object.entries(newGrades.value ?? {})
     .forEach(([gradeUuid, data]) => {
       if (data[0] === courseUuid && newGrades.value) {
-        delete newGrades.value[gradeUuid]
+        delete newGrades.value[gradeUuid];
       }
-    })
-  newGrades.value = { ...newGrades.value }
-}
+    });
+  newGrades.value = { ...newGrades.value };
+};
 
 async function fetchGrades() {
   if (loading.value) {
-    return
+    return;
   }
-  loading.value = true
+  loading.value = true;
   const t = setTimeout(() => {
-    loading.value = false
-  }, 10000)
+    loading.value = false;
+  }, 10000);
   browser.runtime.sendMessage({
     type: 'fetchResults',
   })
     .finally(() => {
-      clearTimeout(t)
-      loading.value = false
-    })
+      clearTimeout(t);
+      loading.value = false;
+    });
 }
 </script>
 <style>

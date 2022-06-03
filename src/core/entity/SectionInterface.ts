@@ -1,4 +1,4 @@
-import GradeInterface from '@/core/entity/GradeInterface'
+import GradeInterface from '@/core/entity/GradeInterface';
 
 export default interface SectionInterface {
   uuid: string;

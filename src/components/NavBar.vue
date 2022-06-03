@@ -13,4 +13,4 @@
 </template>
 
 <script lang="ts" setup>
-import { routes } from '@/router'</script>
+import { routes } from '@/router'; </script>

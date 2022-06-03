@@ -10,9 +10,9 @@ export default {
   data() {
     return {
       msg: 'options',
-    }
+    };
   },
-}
+};
 
 </script>
 

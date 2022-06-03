@@ -184,26 +184,26 @@
 
 <script lang="ts" setup>
 
-import { UserInfo } from '@/core/Gaps'
-import { onUnmounted } from 'vue'
-import settings from '@/store/Settings'
-import { useStorage } from '@/store/useStorage'
-import browser from 'webextension-polyfill'
+import { UserInfo } from '@/core/Gaps';
+import { onUnmounted } from 'vue';
+import settings from '@/store/Settings';
+import { useStorage } from '@/store/useStorage';
+import browser from 'webextension-polyfill';
 
-const getManifest = () => browser.runtime.getManifest()
+const getManifest = () => browser.runtime.getManifest();
 
-const languages = ['en', 'fr']
+const languages = ['en', 'fr'];
 
-const info = useStorage<UserInfo>({ id: 'info' })
+const info = useStorage<UserInfo>({ id: 'info' });
 const years = useStorage<number[]>({
   id: 'years',
   defaultState: [],
-})
+});
 
 onUnmounted(() => {
-  info.unlink()
-  years.unlink()
-})
+  info.unlink();
+  years.unlink();
+});
 
 async function login() {
   await browser.runtime.sendMessage({
@@ -212,12 +212,12 @@ async function login() {
       username: settings.value?.credentials.username,
       password: settings.value?.credentials.password,
     },
-  })
+  });
 }
 
 async function logout() {
   await browser.runtime.sendMessage({
     type: 'clear',
-  })
+  });
 }
 </script>

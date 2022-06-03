@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build:firefox": "vue-cli-service build --extension firefox",
+    "build:chrome": "vue-cli-service build --extension chrome",
     "lint": "vue-cli-service lint --fix",
     "build-watch": "vue-cli-service  --env.NODE_ENV=development build-watch --mode development"
   },
@@ -42,6 +43,7 @@
     "@vue/eslint-config-airbnb": "^6.0.0",
     "@vue/eslint-config-typescript": "^10.0.0",
     "autoprefixer": "^10.4.4",
+    "chrome-plugin-icon-generator": "^1.0.0",
     "eslint": "^8.16.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
@@ -53,7 +55,8 @@
     "sass-loader": "^13.0.0",
     "typescript": "~4.7.2",
     "vue-cli-plugin-chrome-extension-cli": "~1.1.3",
-    "vue-cli-plugin-vuetify": "~2.5.1"
+    "vue-cli-plugin-vuetify": "~2.5.1",
+    "yargs": "^17.5.1"
   },
   "gitHooks": {
     "pre-commit": "lint-staged"
