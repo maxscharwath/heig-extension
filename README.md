@@ -1,3 +1,5 @@
+![icon](https://user-images.githubusercontent.com/6887819/171869997-3c4e96df-a734-456d-b4d1-771aab90064a.png)
+
 # HEIG-VD Extension
 
 ## Download the extension
@@ -15,7 +17,7 @@ This extension does the following:
 ## Where my data is stored?
 
 The data is stored in a local. No data is sent to a server.
-All data is stored with ``broeser storage API``.
+All data is stored with ``browser storage API``.
 
 ## How to use the extension?
 
