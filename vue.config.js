@@ -6,8 +6,7 @@ const yargs = require('yargs');
 const pages = {};
 
 function getEntryFile(entryPath) {
-  const files = fs.readdirSync(entryPath);
-  return files;
+  return fs.readdirSync(entryPath);
 }
 
 const chromeName = getEntryFile(path.resolve('src/entry'));
@@ -44,8 +43,8 @@ module.exports = {
               to: path.resolve(outputDir),
             },
             {
-              from: path.resolve(`src/manifest.${type}.json`),
-              to: `${path.resolve(outputDir)}/manifest.json`,
+              from: path.resolve('src', `manifest.${type}.json`),
+              to: path.resolve(outputDir, 'manifest.json'),
             },
           ],
         },

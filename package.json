@@ -6,6 +6,7 @@
     "serve": "vue-cli-service serve",
     "build:firefox": "vue-cli-service build --extension firefox",
     "build:chrome": "vue-cli-service build --extension chrome",
+    "build:all": "concurrently \"npm:build:firefox\" \"npm:build:chrome\"",
     "lint": "vue-cli-service lint --fix",
     "build-watch": "vue-cli-service  --env.NODE_ENV=development build-watch --mode development"
   },
@@ -30,9 +31,11 @@
   },
   "devDependencies": {
     "@types/chrome": "^0.0.188",
+    "@types/node": "^17.0.40",
     "@types/object-hash": "^2.2.1",
     "@types/webextension-polyfill": "^0.9.0",
     "@types/webfontloader": "^1.0.0",
+    "@types/yargs": "^17.0.10",
     "@typescript-eslint/eslint-plugin": "^5.27.0",
     "@typescript-eslint/parser": "^5.27.0",
     "@vue/cli-plugin-babel": "~5.0.0",
@@ -44,6 +47,7 @@
     "@vue/eslint-config-typescript": "^10.0.0",
     "autoprefixer": "^10.4.4",
     "chrome-plugin-icon-generator": "^1.0.0",
+    "concurrently": "^7.2.1",
     "eslint": "^8.16.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",

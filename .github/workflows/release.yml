@@ -1,0 +1,58 @@
+name: Release on tags
+on:
+  push:
+    tags:
+      - "v*"
+jobs:
+  release:
+    name: Create release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16.x"
+          cache: 'npm'
+      - run: npm install
+      - run: npm run build:all
+
+      - uses: montudor/action-zip@v1
+        with:
+          args: zip -qq -r ./release/chrome.zip ./dist/chrome
+
+      - uses: montudor/action-zip@v1
+        with:
+          args: zip -qq -r ./release/firefox.zip ./dist/firefox
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload Chrome
+        id: upload-zip-chrome
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/chrome.zip
+          asset_name: chrome.zip
+          asset_content_type: application/zip
+
+      - name: Upload Firefox
+        id: upload-zip-firefox
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/firefox.zip
+          asset_name: firefox.zip
+          asset_content_type: application/zip
