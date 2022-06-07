@@ -4,8 +4,8 @@
 
 ## Download the extension
 
-[![Chrome](https://img.shields.io/badge/Firefox_Browser-FF7139?style=for-the-badge&logo=Firefox-Browser&logoColor=white)](https://addons.mozilla.org/fr/firefox/addon/heig-vd-extension/)
-[![Firefox](https://img.shields.io/badge/Google_chrome-4285F4?style=for-the-badge&logo=Google-chrome&logoColor=white)](https://chrome.google.com/webstore/detail/heig-vd-extension/jomjkahkhblnklhchbifebejlgndmplf)
+[![Firefox](https://img.shields.io/badge/Firefox_Browser-FF7139?style=for-the-badge&logo=Firefox-Browser&logoColor=white)](https://addons.mozilla.org/fr/firefox/addon/heig-vd-extension/)
+[![Chrome](https://img.shields.io/badge/Google_chrome-4285F4?style=for-the-badge&logo=Google-chrome&logoColor=white)](https://chrome.google.com/webstore/detail/heig-vd-extension/jomjkahkhblnklhchbifebejlgndmplf)
 
 ## What can the extension do?
 
