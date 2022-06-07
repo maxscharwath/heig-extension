@@ -17,13 +17,19 @@ jobs:
       - run: yarn install
       - run: yarn build:all
 
-      - uses: montudor/action-zip@v1
+      - name: Archive Release for Chrome
+        uses: thedoctor0/zip-release@main
         with:
-          args: zip -qq -r ./release/chrome.zip ./dist/chrome
+          type: 'zip'
+          path: './dist/chrome'
+          filename: 'chrome.zip'
 
-      - uses: montudor/action-zip@v1
+      - name: Archive Release for Firefox
+        uses: thedoctor0/zip-release@main
         with:
-          args: zip -qq -r ./release/firefox.zip ./dist/firefox
+          type: 'zip'
+          path: './dist/firefox'
+          filename: 'firefox.zip'
 
       - name: Create Release
         id: create_release
@@ -42,7 +48,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release/chrome.zip
+          asset_path: ./chrome.zip
           asset_name: chrome.zip
           asset_content_type: application/zip
 
@@ -53,6 +59,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release/firefox.zip
+          asset_path: ./firefox.zip
           asset_name: firefox.zip
           asset_content_type: application/zip
