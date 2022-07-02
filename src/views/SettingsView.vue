@@ -71,7 +71,7 @@
         </v-expansion-panels>
       </v-card-text>
     </v-card>
-    <v-card v-else class="mb-3">
+    <v-card class="mb-3">
       <v-card-title>
         {{
           $vuetify.locale.getScope()
@@ -160,6 +160,22 @@
     <v-card class="mb-3">
       <v-list>
         <v-list-subheader>Informations</v-list-subheader>
+        <v-list-item @click="clearCache">
+          <v-list-item-avatar>
+            <v-icon>mdi-delete</v-icon>
+          </v-list-item-avatar>
+          <v-list-item-header>
+            <v-list-item-title>
+              {{
+                $vuetify.locale.getScope()
+                  .t('$vuetify.settings.clearCache.title')
+              }}
+            </v-list-item-title>
+            <v-list-item-subtitle>
+              {{ storageSize }}
+            </v-list-item-subtitle>
+          </v-list-item-header>
+        </v-list-item>
         <v-list-item>
           <v-list-item-avatar>
             <v-icon>mdi-information</v-icon>
@@ -185,12 +201,28 @@
 <script lang="ts" setup>
 
 import { UserInfo } from '@/core/Gaps';
-import { onUnmounted } from 'vue';
+import {
+  computed, onMounted, onUnmounted, ref,
+} from 'vue'
 import settings from '@/store/Settings';
 import { useStorage } from '@/store/useStorage';
 import browser from 'webextension-polyfill';
 
 const getManifest = () => browser.runtime.getManifest();
+
+const storageSizeBytes = ref(0)
+
+const storageSize = computed(() => {
+  const size = storageSizeBytes.value
+  if (size < 1024) {
+    return `${size} bytes`
+  } if (size < 1024 * 1024) {
+    return `${(size / 1024).toFixed(2)} KB`
+  } if (size < 1024 * 1024 * 1024) {
+    return `${(size / 1024 / 1024).toFixed(2)} MB`
+  }
+  return `${(size / 1024 / 1024 / 1024).toFixed(2)} GB`
+})
 
 const languages = ['en', 'fr'];
 
@@ -206,13 +238,15 @@ onUnmounted(() => {
 });
 
 async function login() {
-  await browser.runtime.sendMessage({
+  const response = await browser.runtime.sendMessage({
     type: 'login',
     payload: {
       username: settings.value?.credentials.username,
       password: settings.value?.credentials.password,
     },
   });
+  // todo: handle error
+  console.log(response);
 }
 
 async function logout() {
@@ -220,4 +254,21 @@ async function logout() {
     type: 'clear',
   });
 }
+
+async function clearCache() {
+  await browser.storage.local.clear();
+}
+
+async function getStorageSize() {
+  storageSizeBytes.value = JSON.stringify(await browser.storage.local.get()).length;
+}
+
+onMounted(async () => {
+  await getStorageSize();
+  browser.storage.local.onChanged.addListener(getStorageSize);
+});
+
+onUnmounted(() => {
+  browser.storage.local.onChanged.removeListener(getStorageSize);
+});
 </script>

@@ -32,6 +32,9 @@ export default {
     logout: 'Logout',
     login: 'Login',
     save: 'Save',
+    clearCache: {
+      title: 'Clear cache',
+    },
     language: {
       title: 'Language',
     },

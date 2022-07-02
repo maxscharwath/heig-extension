@@ -26,7 +26,7 @@ export default class GradesManager extends TypedEmitter<{
 }> {
   private gradesHash = useStorage({
     id: 'gradesHash',
-    defaultState: new Set<string>(),
+    defaultState: () => new Set<string>(),
     transformer: {
       from: (value: string[]): Set<string> => new Set(value),
       to: (value: Set<string>): string[] => [...value],
@@ -108,5 +108,12 @@ export default class GradesManager extends TypedEmitter<{
       this.emit('newGrades', newGrades);
     }
     console.log(`GradesManager: addCourses: ${newGrades.length} new grades`);
+  }
+
+  public clear() {
+    this.gradesData.clear();
+    this.updatedAt.clear();
+    this.gradesHash.clear();
+    this.newGradesNotification.clear();
   }
 }

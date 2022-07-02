@@ -37,13 +37,13 @@ async function checkResults() {
 async function logout() {
   console.log('logout');
   await gaps.logout();
-  await browser.storage.local.clear();
+  manager.clear();
+  info.clear();
+  years.clear();
 }
 
 async function login(credentials: { username: string, password: string }) {
   try {
-    console.log('login');
-    await logout();
     await gaps.loginCredentials(credentials);
     years.value = await gaps.getYearAvailable();
     info.value = await gaps.getInfo();
@@ -72,28 +72,20 @@ settings.onChange((data) => {
   });
 });
 
-browser.runtime.onMessage.addListener(async (request, sender) => {
+browser.runtime.onMessage.addListener(async (request) => {
   console.log('onMessage', request);
   const payload = request.payload ?? {};
   switch (request.type) {
     case 'fetchResults':
       await checkResults();
-      await browser.runtime.sendMessage({
-        success: true,
-      });
-      break;
+      return { success: true };
     case 'clear':
       await logout();
       await browser.action.setBadgeText({ text: '' });
-      break;
-    case 'login': {
-      const result = await login(payload);
-      await browser.runtime.sendMessage({
-        success: result,
-      });
-    }
-      break;
+      return { success: true };
+    case 'login':
+      return { success: await login(payload) };
     default:
-      break;
+      return { success: false };
   }
 });

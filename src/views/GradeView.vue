@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar app dense>
+  <v-app-bar :extended="showMenu" app dense>
     <div class="text-caption">
       {{
         $vuetify.locale.getScope()
@@ -10,6 +10,15 @@
     <v-btn icon size="small" @click="fetchGrades">
       <v-icon>mdi-refresh</v-icon>
     </v-btn>
+    <v-btn icon size="small" @click="showMenu=!showMenu">
+      <v-icon>mdi-dots-vertical</v-icon>
+    </v-btn>
+    <template v-if="showMenu" v-slot:extension>
+      <v-btn @click="checkAll">
+        <v-icon color="yellow" icon="mdi-new-box"/>
+        mark as read
+      </v-btn>
+    </template>
   </v-app-bar>
   <v-progress-linear v-if="loading" :indeterminate="true"/>
   <v-container fluid>
@@ -115,7 +124,7 @@ const updateAt = useStorage<Date, string>({
     to: (value) => value.toISOString(),
   },
 });
-
+const showMenu = ref(false);
 const loading = ref<boolean>(false);
 
 const gradeIsNew = (gradeUuid: string) => !!(newGrades.value ?? {})[gradeUuid];
@@ -128,6 +137,10 @@ onUnmounted(() => {
   updateAt.unlink();
   result.unlink();
 });
+
+const checkAll = () => {
+  newGrades.value = {};
+};
 
 const checkGrade = (gradeUuid: string) => {
   if (!newGrades.value) {

@@ -32,6 +32,9 @@ export default {
     logout: 'Déconnexion',
     login: 'Connexion',
     save: 'Enregistrer',
+    clearCache: {
+      title: 'Vider le cache',
+    },
     language: {
       title: 'Langue',
     },

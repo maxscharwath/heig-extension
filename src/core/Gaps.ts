@@ -105,7 +105,7 @@ export default class GAPS extends TypedEmitter<{
         },
       });
       const data = await response.text();
-      const userIdMatch = data.match(/DEFAULT_STUDENT_ID = ([0-9]+);/);
+      const userIdMatch = data.match(/DEFAULT_STUDENT_ID = (\d+);/);
       if (!userIdMatch) {
         return false;
       }
@@ -124,7 +124,7 @@ export default class GAPS extends TypedEmitter<{
         verify: true,
       });
       const data = await response.text();
-      const userIdMatch = data.match(/DEFAULT_STUDENT_ID = ([0-9]+);/);
+      const userIdMatch = data.match(/DEFAULT_STUDENT_ID = (\d+);/);
       if (!userIdMatch) return false;
       this.#userId = +userIdMatch[1];
       return true;
@@ -270,11 +270,11 @@ export default class GAPS extends TypedEmitter<{
             ).toISOString(),
             coefficient:
               +(
-                $td
+                ($td
                   .eq(3)
                   .text()
                   .trim()
-                  .match(/\d+(?=%)/) ?? [0][0]
+                  .match(/([+-]?(\d*[.])?\d+)(?=%)/) ?? [1])[0]
               ) / 100,
             grade: +$td.eq(4)
               .text()
