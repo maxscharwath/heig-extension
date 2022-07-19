@@ -5,7 +5,7 @@
           .t('$vuetify.menu.menuOfDay')
       }}
     </v-app-bar-title>
-    <v-spacer></v-spacer>
+    <v-spacer/>
     <v-btn icon size="small" @click="showWeek=!showWeek">
       <v-icon>mdi-calendar-range</v-icon>
     </v-btn>
@@ -13,33 +13,35 @@
       <v-icon>mdi-refresh</v-icon>
     </v-btn>
     <template v-if="showWeek" v-slot:extension>
-      <v-tabs v-model="selectedDay" center-active centered class="w-100">
-        <v-tab>{{
-            $vuetify.locale.getScope()
-              .t('$vuetify.weeks.monday')
-          }}
-        </v-tab>
-        <v-tab>{{
-            $vuetify.locale.getScope()
-              .t('$vuetify.weeks.tuesday')
-          }}
-        </v-tab>
-        <v-tab>{{
-            $vuetify.locale.getScope()
-              .t('$vuetify.weeks.wednesday')
-          }}
-        </v-tab>
-        <v-tab>{{
-            $vuetify.locale.getScope()
-              .t('$vuetify.weeks.thursday')
-          }}
-        </v-tab>
-        <v-tab>{{
-            $vuetify.locale.getScope()
-              .t('$vuetify.weeks.friday')
-          }}
-        </v-tab>
-      </v-tabs>
+      <div class="w-100">
+        <v-tabs v-model="selectedDay" center-active show-arrows>
+          <v-tab>{{
+              $vuetify.locale.getScope()
+                .t('$vuetify.weeks.monday')
+            }}
+          </v-tab>
+          <v-tab>{{
+              $vuetify.locale.getScope()
+                .t('$vuetify.weeks.tuesday')
+            }}
+          </v-tab>
+          <v-tab>{{
+              $vuetify.locale.getScope()
+                .t('$vuetify.weeks.wednesday')
+            }}
+          </v-tab>
+          <v-tab>{{
+              $vuetify.locale.getScope()
+                .t('$vuetify.weeks.thursday')
+            }}
+          </v-tab>
+          <v-tab>{{
+              $vuetify.locale.getScope()
+                .t('$vuetify.weeks.friday')
+            }}
+          </v-tab>
+        </v-tabs>
+      </div>
     </template>
   </v-app-bar>
   <v-progress-linear v-if="loading" :indeterminate="true"/>
@@ -54,51 +56,16 @@ import {
   computed, onMounted, onUnmounted, ref,
 } from 'vue';
 import db from '@/core/database';
-import { UserInfo } from '@/core/Gaps';
 import SingleMenu from '@/components/SingleMenu.vue';
 import { TopChefAPI } from '@/core/env';
-import { useStorage } from '@/store/useStorage';
+import { info } from '@/store/store'
+import { Menu, MenuResponse, MenuWeekResponse } from '@/store/Menu'
 
-const info = useStorage<UserInfo>({
-  id: 'info',
-});
 const showWeek = ref(false);
-
-interface MenuBase {
-  starter: string;
-  mainCourse: string[];
-  dessert: string;
-  containsPork: boolean;
-}
-
-export interface Menu extends MenuBase {
-  hash: string;
-  rating: {
-    value: number;
-    count: number;
-  };
-}
-
-export interface MenuResponse {
-  day: string;
-  menus: Menu[];
-}
-
-interface MenuWeekResponse {
-  _id: string;
-  week: number;
-  year: number;
-  monday: string;
-  friday: string;
-  days: MenuResponse[];
-  lastSave: string;
-  lastPublish: string;
-  lastNotify: string;
-}
+const selectedDay = ref<number>(0);
 
 const menusToday = ref<MenuResponse>();
 const menusWeek = ref<MenuResponse[]>([]);
-const selectedDay = ref<number>(0);
 const loading = ref(false);
 
 const menus = computed(() => {
@@ -121,10 +88,7 @@ async function rateMenu(hash: string, rating: number) {
 function registerRating(menu: Menu): Menu {
   ratings.get(menu.hash)
     .get('ratings')
-    .on(({
-      _,
-      ...r
-    }) => {
+    .on(({ _, ...r }) => {
       const rates: number[] = Object.values(r);
       menu.rating = {
         value: rates.reduce((a, b) => a + b, 0) / rates.length,
@@ -185,7 +149,6 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  info.unlink();
   ratings.off();
 });
 </script>

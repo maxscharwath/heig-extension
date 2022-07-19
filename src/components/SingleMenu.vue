@@ -3,7 +3,7 @@
     v-if="!!menu.starter || !!menu.dessert || !!menu.mainCourse.join()"
     class="text-center mb-3"
   >
-    <v-card-header class="d-flex justify-center">
+    <v-card-text class="d-flex justify-center">
       <div>
         <div class="text-overline">{{ menu.starter }}</div>
         <v-divider/>
@@ -16,7 +16,7 @@
         <v-divider/>
         <div class="text-overline">{{ menu.dessert }}</div>
       </div>
-    </v-card-header>
+    </v-card-text>
     <v-card-actions class="d-flex justify-center">
       {{ menu.rating.count }}
       <v-rating

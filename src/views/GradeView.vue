@@ -15,8 +15,11 @@
     </v-btn>
     <template v-if="showMenu" v-slot:extension>
       <v-btn @click="checkAll">
-        <v-icon color="yellow" icon="mdi-new-box"/>
-        mark as read
+        <v-icon color="yellow" icon="mdi-new-box" start/>
+        {{
+          $vuetify.locale.getScope()
+            .t('$vuetify.grades.checkAll')
+        }}
       </v-btn>
     </template>
   </v-app-bar>
@@ -102,28 +105,10 @@
 </template>
 
 <script lang="ts" setup>
-import { onUnmounted, ref } from 'vue';
-import CourseInterface from '@/core/entity/CourseInterface';
-import { NewGrades } from '@/core/manager/GradesManager';
-import { useStorage } from '@/store/useStorage';
+import { ref } from 'vue';
 import browser from 'webextension-polyfill';
+import { newGrades, result, updateAt } from '@/store/store'
 
-const result = useStorage<CourseInterface[]>({
-  id: 'gradesData',
-  defaultState: [],
-});
-const newGrades = useStorage<NewGrades>({
-  id: 'newGrades',
-  defaultState: {},
-});
-const updateAt = useStorage<Date, string>({
-  id: 'updatedAt',
-  defaultState: new Date(0),
-  transformer: {
-    from: (value) => new Date(value ?? 0),
-    to: (value) => value.toISOString(),
-  },
-});
 const showMenu = ref(false);
 const loading = ref<boolean>(false);
 
@@ -132,11 +117,6 @@ const sectionHasNewGrade = (sectionUuid: string) => Object.values(newGrades.valu
   .some((grade) => grade[1] === sectionUuid);
 const courseHasNewGrade = (courseUuid: string) => Object.values(newGrades.value ?? {})
   .some((grade) => grade[0] === courseUuid);
-
-onUnmounted(() => {
-  updateAt.unlink();
-  result.unlink();
-});
 
 const checkAll = () => {
   newGrades.value = {};

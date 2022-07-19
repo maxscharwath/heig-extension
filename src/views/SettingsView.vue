@@ -1,11 +1,11 @@
 <template>
   <v-container fluid>
     <v-card v-if="info" class="mb-3">
-      <v-card-header class="d-flex justify-center flex-column">
+      <v-card-title class="d-flex justify-center">
         <v-avatar size="100">
           <v-img :cover="true" :src="info.pictureUrl" alt="profile"/>
         </v-avatar>
-      </v-card-header>
+      </v-card-title>
       <v-card-text>
         <v-expansion-panels>
           <v-expansion-panel>
@@ -78,19 +78,22 @@
             .t('$vuetify.settings.gapsCredentials')
         }}
       </v-card-title>
-      <v-card-content>
+      <v-card-text>
+        <v-alert :type="credentials.alert?.type" v-if="credentials.alert" class="my-3">{{credentials.alert?.message}}</v-alert>
         <v-text-field
-          v-model.trim.lazy="settings.credentials.username"
+          variant="outlined"
+          v-model.trim.lazy="credentials.username"
           :label="$vuetify.locale.getScope().t('$vuetify.settings.username')"
           :rules="[v => !!v || 'Username is required']"
         />
         <v-text-field
-          v-model.trim.lazy="settings.credentials.password"
+          variant="outlined"
+          v-model.trim.lazy="credentials.password"
           :label="$vuetify.locale.getScope().t('$vuetify.settings.password')"
           :rules="[v => !!v || 'Password is required']"
           type="password"
         />
-      </v-card-content>
+      </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="error" @click="logout">{{
@@ -114,7 +117,7 @@
           }}
         </v-list-subheader>
         <v-list-item>
-          <v-list-item-avatar start>
+          <v-list-item-avatar>
             <v-icon>mdi-clock</v-icon>
           </v-list-item-avatar>
           <v-list-item-header>
@@ -141,17 +144,21 @@
           </v-list-item-header>
         </v-list-item>
         <v-list-item>
-          <v-list-item-avatar start>
+          <v-list-item-avatar>
             <v-icon>mdi-translate</v-icon>
           </v-list-item-avatar>
           <v-list-item-header>
-            <v-list-item-title>
-              {{
-                $vuetify.locale.getScope()
-                  .t('$vuetify.settings.language.title')
-              }}
-            </v-list-item-title>
-            <v-select v-model.lazy="settings.language" :items="languages"></v-select>
+            <v-select
+              variant="outlined"
+              hide-details
+              :label=" $vuetify.locale.getScope()
+                  .t('$vuetify.settings.language.title')"
+              v-model="settings.language"
+              :items="languages"
+              item-title="text"
+              item-value="value"
+            >
+            </v-select>
           </v-list-item-header>
         </v-list-item>
       </v-list>
@@ -160,6 +167,19 @@
     <v-card class="mb-3">
       <v-list>
         <v-list-subheader>Informations</v-list-subheader>
+        <v-list-item @click="browser.runtime.reload()">
+          <v-list-item-avatar>
+            <v-icon>mdi-refresh</v-icon>
+          </v-list-item-avatar>
+          <v-list-item-header>
+            <v-list-item-title>
+              {{
+                $vuetify.locale.getScope()
+                  .t('$vuetify.settings.reload')
+              }}
+            </v-list-item-title>
+          </v-list-item-header>
+        </v-list-item>
         <v-list-item @click="clearCache">
           <v-list-item-avatar>
             <v-icon>mdi-delete</v-icon>
@@ -176,7 +196,7 @@
             </v-list-item-subtitle>
           </v-list-item-header>
         </v-list-item>
-        <v-list-item>
+        <v-list-item @dblclick="router.push('/debug')">
           <v-list-item-avatar>
             <v-icon>mdi-information</v-icon>
           </v-list-item-avatar>
@@ -200,13 +220,27 @@
 
 <script lang="ts" setup>
 
-import { UserInfo } from '@/core/Gaps';
 import {
   computed, onMounted, onUnmounted, ref,
 } from 'vue'
-import settings from '@/store/Settings';
-import { useStorage } from '@/store/useStorage';
 import browser from 'webextension-polyfill';
+import { settings, info } from '@/store/store'
+import { useRouter } from 'vue-router'
+
+const router = useRouter();
+
+const credentials = ref<{
+  alert: null |{
+    type: 'error' | 'success' | 'warning' | 'info',
+    message: string,
+  },
+  username: string,
+  password: string,
+}>({
+  alert: null,
+  username: '',
+  password: '',
+})
 
 const getManifest = () => browser.runtime.getManifest();
 
@@ -223,30 +257,23 @@ const storageSize = computed(() => {
   }
   return `${(size / 1024 / 1024 / 1024).toFixed(2)} GB`
 })
-
-const languages = ['en', 'fr'];
-
-const info = useStorage<UserInfo>({ id: 'info' });
-const years = useStorage<number[]>({
-  id: 'years',
-  defaultState: [],
-});
-
-onUnmounted(() => {
-  info.unlink();
-  years.unlink();
-});
+const languages = [
+  { text: 'English', value: 'en' },
+  { text: 'Français', value: 'fr' },
+];
 
 async function login() {
   const response = await browser.runtime.sendMessage({
     type: 'login',
-    payload: {
-      username: settings.value?.credentials.username,
-      password: settings.value?.credentials.password,
-    },
+    payload: credentials.value,
   });
-  // todo: handle error
-  console.log(response);
+  credentials.value.alert = response.success ? {
+    type: 'success',
+    message: 'Login successful',
+  } : {
+    type: 'error',
+    message: 'Login failed',
+  };
 }
 
 async function logout() {

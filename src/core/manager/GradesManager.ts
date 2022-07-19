@@ -27,9 +27,9 @@ export default class GradesManager extends TypedEmitter<{
   private gradesHash = useStorage({
     id: 'gradesHash',
     defaultState: () => new Set<string>(),
-    transformer: {
-      from: (value: string[]): Set<string> => new Set(value),
-      to: (value: Set<string>): string[] => [...value],
+    preTransformers: {
+      read: (value: string): Set<string> => new Set(JSON.parse(value)),
+      write: (value: Set<string>): string => JSON.stringify([...value]),
     },
   });
 
@@ -41,9 +41,9 @@ export default class GradesManager extends TypedEmitter<{
   private updatedAt = useStorage<Date, string>({
     id: 'updatedAt',
     defaultState: new Date(0),
-    transformer: {
-      from: (value: string): Date => new Date(value),
-      to: (value: Date): string => value.toISOString(),
+    preTransformers: {
+      read: (value: string): Date => new Date(value),
+      write: (value: Date): string => value.toISOString(),
     },
   });
 

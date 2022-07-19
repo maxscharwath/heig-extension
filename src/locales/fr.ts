@@ -3,6 +3,7 @@ export default {
     grade: 'Notes',
     menu: 'Menu',
     settings: 'Paramètres',
+    debug: 'Débogage',
   },
   weeks: {
     monday: 'Lundi',
@@ -16,6 +17,7 @@ export default {
   grades: {
     lastCheckAt: 'Dernière vérification à',
     hasExam: 'A un examen',
+    checkAll: 'Tout marquer',
   },
   menu: {
     menuOfDay: 'Menu du jour',
@@ -32,6 +34,7 @@ export default {
     logout: 'Déconnexion',
     login: 'Connexion',
     save: 'Enregistrer',
+    reload: 'Recharger l\'extension',
     clearCache: {
       title: 'Vider le cache',
     },

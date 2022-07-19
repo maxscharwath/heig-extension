@@ -1,7 +1,7 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import GradeView from '@/views/GradeView.vue';
 
-export const routes: Array<RouteRecordRaw & { icon: string, i18n: string }> = [
+export const routes: Array<RouteRecordRaw & { icon: string, i18n: string, debug?:boolean } > = [
   {
     path: '/',
     icon: 'mdi-school',
@@ -22,6 +22,14 @@ export const routes: Array<RouteRecordRaw & { icon: string, i18n: string }> = [
     name: 'settings',
     i18n: '$vuetify.routes.settings',
     component: () => import('@/views/SettingsView.vue'),
+  },
+  {
+    path: '/debug',
+    icon: 'mdi-bug',
+    name: 'debug',
+    i18n: '$vuetify.routes.debug',
+    debug: true,
+    component: () => import('@/views/DebugView.vue'),
   },
 ];
 

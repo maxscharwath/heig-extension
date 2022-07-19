@@ -3,6 +3,7 @@ export default {
     grade: 'Grades',
     menu: 'Menu',
     settings: 'Settings',
+    debug: 'Debug',
   },
   weeks: {
     monday: 'Monday',
@@ -16,6 +17,7 @@ export default {
   grades: {
     lastCheckAt: 'Last check at',
     hasExam: 'Has exam',
+    checkAll: 'Check all',
   },
   menu: {
     menuOfDay: 'Menu of the day',
@@ -32,6 +34,7 @@ export default {
     logout: 'Logout',
     login: 'Login',
     save: 'Save',
+    reload: 'Reload the extension',
     clearCache: {
       title: 'Clear cache',
     },

@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import { CheerioAPI } from 'cheerio';
+import { ResponsePromise } from 'ky/distribution/types/ResponsePromise'
 
 export default class CheerioResponse extends Response {
   $!: CheerioAPI;
@@ -21,3 +22,5 @@ export default class CheerioResponse extends Response {
     return new CheerioResponse(this.body, this, this.$);
   }
 }
+
+export type CheerioResponsePromise = Promise<CheerioResponse> & ResponsePromise

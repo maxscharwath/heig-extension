@@ -1,13 +1,13 @@
-import { CheerioAPI } from 'cheerio';
 import { TypedEmitter } from 'tiny-typed-emitter';
-import ky, { Options, ResponsePromise } from 'ky';
+import ky, { Options } from 'ky';
 import { KyInstance } from 'ky/distribution/types/ky';
 import { Input } from 'ky/distribution/types/options';
 import CourseInterface from '@/core/entity/CourseInterface';
 import GradeInterface from '@/core/entity/GradeInterface';
-import CheerioResponse from '@/core/CheerioResponse';
+import CheerioResponse, { CheerioResponsePromise } from '@/core/CheerioResponse'
 import objectHash from 'object-hash';
 import browser from 'webextension-polyfill';
+import { satisfies } from 'compare-versions';
 
 export type Credentials = {
   username: string;
@@ -31,15 +31,13 @@ export type UserInfo = {
   faculty: string;
 };
 
-type CheerioResponsePromise = ResponsePromise & Promise<{
-  $: CheerioAPI;
-}>;
-
 export default class GAPS extends TypedEmitter<{
   loginError: (_status: string) => void;
   sessionExpireSoon: (_expireIn: number) => void;
 }> {
   readonly #client: KyInstance;
+
+  #compatibleVersion = '~4.58';
 
   #userId?: number;
 
@@ -56,6 +54,11 @@ export default class GAPS extends TypedEmitter<{
         ],
       },
     });
+    (async () => {
+      if (!await this.isCompatible()) {
+        console.error('GAPS version is not compatible');
+      }
+    })();
   }
 
   public async hasToken(): Promise<boolean> {
@@ -90,6 +93,7 @@ export default class GAPS extends TypedEmitter<{
     await this.request('Shibboleth.sso/Logout', {
       method: 'GET',
     });
+    await chrome.cookies.remove({ name: 'GAPSSESSID', url: this.#baseUrl })
   }
 
   public async loginCredentials(credentials: Credentials): Promise<boolean> {
@@ -159,21 +163,44 @@ export default class GAPS extends TypedEmitter<{
     }
   }
 
+  public getGapsVersion(): Promise<string>;
+
+  public getGapsVersion(response:CheerioResponse): string;
+
+  public getGapsVersion(response?:CheerioResponse): string | Promise<string> {
+    if (response) {
+      return response.$('title').text().match(/([+-]?(\d*[.])?\d+)/)?.[0] ?? '';
+    }
+    return this.request('consultation/controlescontinus', {
+      method: 'GET',
+      verify: true,
+    }).then((r) => this.getGapsVersion(r));
+  }
+
+  public isCompatible(): Promise<boolean>;
+
+  public isCompatible(response:CheerioResponse): boolean;
+
+  public isCompatible(response?:CheerioResponse): boolean | Promise<boolean> {
+    if (response) {
+      return satisfies(this.getGapsVersion(response), this.#compatibleVersion);
+    }
+    return this.getGapsVersion().then((version) => satisfies(version, this.#compatibleVersion));
+  }
+
   public async getYearAvailable(): Promise<number[]> {
     if (!this.#userId) throw new Error('Not logged in');
     const { $ } = await this.request('consultation/controlescontinus/consultation.php', {
       method: 'GET',
       verify: true,
     });
-    return $('select option')
+    return $('select#selyear option')
       .toArray()
       .reduce((prev: number[], e) => {
-        const val = $(e)
-          .val();
-        if (val) prev.push(+val);
+        const val = $(e).val();
+        if (val) prev.unshift(+val);
         return prev;
-      }, [])
-      .reverse();
+      }, []);
   }
 
   public async getResults(year: number): Promise<CourseInterface[]> {
@@ -181,8 +208,11 @@ export default class GAPS extends TypedEmitter<{
     const { $ } = await this.gapsRequest('consultation/controlescontinus/consultation.php', {
       method: 'POST',
       searchParams: {
-        rs: 'getStudentCCs',
-        rsargs: `[${this.#userId},${year},null]`,
+        idst: this.#userId,
+        idas: -1,
+        year,
+        rs: 'smartReplacePart',
+        rsargs: '["result","result",null,null,null,null]',
       },
     });
     const courses: CourseInterface[] = [];
@@ -376,7 +406,7 @@ export default class GAPS extends TypedEmitter<{
         ],
       },
     })
-      .extend(options?.extended ?? {})(url, options) as CheerioResponsePromise;
+      .extend(options?.extended ?? {})(url, options) as unknown as CheerioResponsePromise;
   }
 
   private gapsRequest(url: Input, options: Options & { verify?: boolean }): CheerioResponsePromise {

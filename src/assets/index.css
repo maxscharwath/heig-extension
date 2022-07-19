@@ -1,13 +1,14 @@
 ::-webkit-scrollbar {
-    width: 5px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #2f2f2f;
+    background: #161616;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #161616;
+    background: #2f2f2f;
 }
 
 body {
