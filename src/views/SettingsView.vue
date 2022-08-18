@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container>
     <gaps-user-info class="mb-3" />
     <gaps-credentials class="mb-3" />
     <v-card class="mb-3">
@@ -71,7 +71,7 @@
         </v-list-item>
         <v-list-item @dblclick="router.push('/debug')" prepend-icon="mdi-information">
           <v-list-item-title>Version</v-list-item-title>
-          <v-list-item-subtitle>{{ getManifest().version }}</v-list-item-subtitle>
+          <v-list-item-subtitle>{{ getManifest().version_name }}</v-list-item-subtitle>
         </v-list-item>
         <v-list-item
           href="https://github.com/maxscharwath/heig-extension"

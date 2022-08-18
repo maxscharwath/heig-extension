@@ -1,25 +1,36 @@
 <template>
   <v-card @click="raw = !raw">
-    <pre v-highlightjs class="wrap" v-if="raw && store.raw">
-      <code class="text">{{store.raw.value}}</code>
-    </pre>
-    <pre v-highlightjs v-else>
-      <code class="json">{{JSON.stringify(store.value, null, 2)}}</code>
+    <pre v-highlightjs v-bind="data.props">
+      <code :class="data.class">{{data.code}}</code>
     </pre>
   </v-card>
 </template>
 
 <script lang="ts" setup>
-import { PropType, ref } from 'vue'
+import { computed, PropType, ref } from 'vue'
 import { ChromeStorage } from '@/store/useStorage'
 
 const raw = ref(false)
-defineProps({
+const props = defineProps({
   store: {
     type: Object as PropType<ChromeStorage<never>>,
     required: true,
   },
 });
+
+const data = computed(() => ((raw.value && props.store.raw.value)
+  ? {
+    code: props.store.raw.value,
+    class: 'text',
+    props: {
+      class: 'wrap',
+    },
+  }
+  : {
+    code: JSON.stringify(props.store.value, null, 2),
+    class: 'json',
+    props: {},
+  }))
 </script>
 
 <style scoped>

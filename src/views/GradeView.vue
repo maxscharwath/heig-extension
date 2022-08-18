@@ -24,7 +24,7 @@
     </template>
   </v-app-bar>
   <v-app-bar height=5 rounded v-if="loading"><v-progress-linear :indeterminate="true" /></v-app-bar>
-  <v-container fluid>
+  <v-container>
     <v-expansion-panels v-if="result" multiple>
       <template v-for="course in result" :key="course.name">
         <v-expansion-panel v-if="!!course.average">
@@ -48,7 +48,7 @@
               }}</span>
             </v-tooltip>
             <v-spacer />
-            <v-chip color="primary">{{ course.average }}</v-chip>
+            <v-chip color="primary">{{ course.average.toFixed(1) }}</v-chip>
           </v-expansion-panel-title>
           <v-expansion-panel-text>
             <v-expansion-panels multiple>
@@ -64,7 +64,7 @@
                   />
                   {{ section.name }}
                   <v-spacer />
-                  <v-chip color="primary" text>{{ section.average }}</v-chip>
+                  <v-chip color="primary" text>{{ section.average.toFixed(1) }}</v-chip>
                 </v-expansion-panel-title>
                 <v-expansion-panel-text>
                   <v-list>
@@ -83,11 +83,11 @@
                         <v-list-item-subtitle>
                           <v-chip :ripple="false" class="mr-1" size="x-small" variant="outlined">
                             <v-icon icon="mdi-percent" start />
-                            {{ grade.coefficient }}
+                            {{ grade.coefficient.toFixed(2) }}
                           </v-chip>
                           <v-chip :ripple="false" class="mr-1" size="x-small" variant="outlined">
                             <v-icon icon="mdi-chart-bar" start />
-                            {{ grade.average }}
+                            {{ grade.average.toFixed(1) }}
                           </v-chip>
                           <v-chip :ripple="false" class="mr-1" size="x-small" variant="outlined">
                             <v-icon icon="mdi-clock" start />

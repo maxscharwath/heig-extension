@@ -1,13 +1,14 @@
 {
   "manifest_version": 3,
-  "name": "HEIG-VD Extension",
+  "name": "HEIG-VD Extension BETA",
   "description": "HEIG-VD extension is useful if you are a student at HEIG-VD",
   "version": "0.1.0",
+  "version_name": "0.1.0-beta.1",
   "icons": {
-    "16": "icons/x16.png",
-    "32": "icons/x32.png",
-    "48": "icons/x48.png",
-    "128": "icons/x128.png"
+    "16": "icons/beta/x16.png",
+    "32": "icons/beta/x32.png",
+    "48": "icons/beta/x48.png",
+    "128": "icons/beta/x128.png"
   },
   "background": {
     "service_worker": "/background.js"

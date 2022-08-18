@@ -3,6 +3,7 @@
   "name": "HEIG-VD Extension",
   "description": "HEIG-VD extension is useful if you are a student at HEIG-VD",
   "version": "0.1.0",
+  "version_name": "0.1.0-beta.1",
   "icons": {
     "16": "icons/x16.png",
     "32": "icons/x32.png",

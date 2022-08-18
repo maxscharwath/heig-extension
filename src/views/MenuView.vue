@@ -13,39 +13,13 @@
       <v-icon>mdi-refresh</v-icon>
     </v-btn>
     <template v-if="showWeek" v-slot:extension>
-      <v-card>
-        <v-tabs v-model="selectedDay" center-active show-arrows>
-          <v-tab>{{
-            $vuetify.locale.getScope()
-              .t('$vuetify.weeks.monday')
-          }}
-          </v-tab>
-          <v-tab>{{
-            $vuetify.locale.getScope()
-              .t('$vuetify.weeks.tuesday')
-          }}
-          </v-tab>
-          <v-tab>{{
-            $vuetify.locale.getScope()
-              .t('$vuetify.weeks.wednesday')
-          }}
-          </v-tab>
-          <v-tab>{{
-            $vuetify.locale.getScope()
-              .t('$vuetify.weeks.thursday')
-          }}
-          </v-tab>
-          <v-tab>{{
-            $vuetify.locale.getScope()
-              .t('$vuetify.weeks.friday')
-          }}
-          </v-tab>
-        </v-tabs>
-      </v-card>
+      <v-tabs v-model="selectedDay" center-active show-arrows centered="" class="w-100">
+        <v-tab v-for="tab in tabs" :key="tab">{{ $vuetify.locale.getScope().t(tab) }}</v-tab>
+      </v-tabs>
     </template>
   </v-app-bar>
   <v-app-bar height=5 rounded v-if="loading"><v-progress-linear :indeterminate="true" /></v-app-bar>
-  <v-container fluid>
+  <v-container>
     <template v-if="menusComputed">
       <SingleMenu v-for="(menu, index) in menusComputed.menus" :key="index" :menu="menu" @rate="rateMenu" />
     </template>
@@ -80,6 +54,13 @@ import { Menu, MenuResponse, MenuWeekResponse } from '@/store/Menu'
 
 const showWeek = ref(false);
 const selectedDay = ref<number>(0);
+const tabs = [
+  '$vuetify.weeks.monday',
+  '$vuetify.weeks.tuesday',
+  '$vuetify.weeks.wednesday',
+  '$vuetify.weeks.thursday',
+  '$vuetify.weeks.friday',
+]
 
 const loading = ref(false);
 

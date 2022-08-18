@@ -1,6 +1,6 @@
 <template>
   <v-app-bar height="72">
-    <v-tabs center-active centered stacked class="w-100">
+    <v-tabs center-active centered="" stacked="" class="w-100">
       <v-tab v-for="route in filtredRoutes" :key="route.path" :to="route.path">
         <v-icon size="small">{{ route.icon }}</v-icon>
         {{

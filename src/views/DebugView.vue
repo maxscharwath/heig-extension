@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container>
     <v-card v-for="([name, store], index) in storesList" :key="index" class="mb-3">
       <v-card-title>
         {{ name }}
