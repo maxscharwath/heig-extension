@@ -22,7 +22,6 @@
     "alarms",
     "storage",
     "cookies",
-    "identity",
     "https://apix.blacktree.io/*",
     "*://*.heig-vd.ch/*",
     "*://heig-gunjs.herokuapp.com/*"
