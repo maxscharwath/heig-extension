@@ -4,7 +4,7 @@
   </v-app-bar>
   <v-container>
     <transition-group name="list" tag="div">
-      <chat-message v-for="msg in store.messages" :msg="msg" :key="msg.uuid" class="mb-2"/>
+      <chat-message v-for="msg in store.messages" :msg="msg" :key="msg.uuid" class="mb-2" />
     </transition-group>
   </v-container>
   <v-app-bar location="bottom" class="pa-2">
@@ -16,15 +16,15 @@
         autofocus="true"
         :placeholder="$vuetify.locale.getScope().t('$vuetify.chat.sendMessage')"
       />
-      <v-btn type="submit" icon="mdi-send" class="ml-2"/>
+      <v-btn type="submit" icon="mdi-send" class="ml-2" />
     </v-form>
   </v-app-bar>
 </template>
 
 <script lang="ts" setup>
+import { ref } from 'vue'
 import ChatMessage from '@/components/ChatMessage.vue'
 import { useChatStore } from '@/store/chat/chat'
-import { ref } from 'vue'
 import { currentUser } from '@/core/database'
 
 const store = useChatStore();

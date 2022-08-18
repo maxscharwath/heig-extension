@@ -1,7 +1,13 @@
 <template>
   <v-tooltip>
     <template v-slot:activator="{ props }">
-      <v-icon small :icon="currentStatus.icon" size="small" :color="currentStatus.color" v-bind="props" @click="check"/>
+      <v-icon
+        :icon="currentStatus.icon"
+        size="small"
+        :color="currentStatus.color"
+        v-bind="props"
+        @click="check"
+      />
     </template>
     {{
       $vuetify.locale.getScope()
@@ -51,7 +57,9 @@ async function check() {
   });
   console.log(response);
   if (response.success) {
-    currentStatus.value = response.data.credentials ? status.connectedCredentials : status.connectedToken;
+    currentStatus.value = response.data.credentials
+      ? status.connectedCredentials
+      : status.connectedToken;
   } else {
     currentStatus.value = status.notConnected;
   }

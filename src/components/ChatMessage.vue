@@ -1,22 +1,22 @@
 <template>
-    <v-card density="compact" class="chat-card" color="transparent" :class="{mine:msg.isMine}">
-        <v-card-text class="d-flex position-relative">
-          <div class="w-100 d-flex flex-column justify-space-between">
-            <div>
-              <div class="chat-user">{{msg.author.name}}</div>
-              <div class="chat-content">{{ msg.message }}</div>
-            </div>
-            <div class="chat-date">
-              {{ msg.postedAt.toLocaleString() }}
-            </div>
-          </div>
-            <div class="d-flex flex-column align-center justify-center ml-3">
-              <v-btn icon="mdi-chevron-up" size="x-small" @click="msg.upVote" :active="msg.hasLiked.upVote"/>
-              <span class="chat-like">{{msg.likes}}</span>
-              <v-btn icon="mdi-chevron-down" size="x-small" @click="msg.downVote" :active="msg.hasLiked.downVote"/>
-            </div>
-        </v-card-text>
-    </v-card>
+  <v-card density="compact" class="chat-card" color="transparent" :class="{ mine: msg.isMine }">
+    <v-card-text class="d-flex position-relative">
+      <div class="w-100 d-flex flex-column justify-space-between">
+        <div>
+          <div class="chat-user">{{msg.author.name}}</div>
+          <div class="chat-content">{{ msg.message }}</div>
+        </div>
+        <div class="chat-date">
+          {{ msg.postedAt.toLocaleString() }}
+        </div>
+      </div>
+      <div class="d-flex flex-column align-center justify-center ml-3">
+        <v-btn icon="mdi-chevron-up" size="x-small" @click="msg.upVote" :active="msg.hasLiked.upVote" />
+        <span class="chat-like">{{msg.likes}}</span>
+        <v-btn icon="mdi-chevron-down" size="x-small" @click="msg.downVote" :active="msg.hasLiked.downVote" />
+      </div>
+    </v-card-text>
+  </v-card>
 </template>
 
 <script lang="ts" setup>

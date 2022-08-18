@@ -1,12 +1,12 @@
 <template>
   <v-app-bar :extended="showWeek" app>
     <v-app-bar-title>{{
-        $vuetify.locale.getScope()
-          .t('$vuetify.menu.menuOfDay')
-      }}
+      $vuetify.locale.getScope()
+        .t('$vuetify.menu.menuOfDay')
+    }}
     </v-app-bar-title>
-    <v-spacer/>
-    <v-btn icon size="small" @click="showWeek=!showWeek">
+    <v-spacer />
+    <v-btn icon size="small" @click="showWeek = !showWeek">
       <v-icon>mdi-calendar-range</v-icon>
     </v-btn>
     <v-btn icon size="small" @click="fetchMenuAll">
@@ -16,44 +16,44 @@
       <v-card>
         <v-tabs v-model="selectedDay" center-active show-arrows>
           <v-tab>{{
-              $vuetify.locale.getScope()
-                .t('$vuetify.weeks.monday')
-            }}
+            $vuetify.locale.getScope()
+              .t('$vuetify.weeks.monday')
+          }}
           </v-tab>
           <v-tab>{{
-              $vuetify.locale.getScope()
-                .t('$vuetify.weeks.tuesday')
-            }}
+            $vuetify.locale.getScope()
+              .t('$vuetify.weeks.tuesday')
+          }}
           </v-tab>
           <v-tab>{{
-              $vuetify.locale.getScope()
-                .t('$vuetify.weeks.wednesday')
-            }}
+            $vuetify.locale.getScope()
+              .t('$vuetify.weeks.wednesday')
+          }}
           </v-tab>
           <v-tab>{{
-              $vuetify.locale.getScope()
-                .t('$vuetify.weeks.thursday')
-            }}
+            $vuetify.locale.getScope()
+              .t('$vuetify.weeks.thursday')
+          }}
           </v-tab>
           <v-tab>{{
-              $vuetify.locale.getScope()
-                .t('$vuetify.weeks.friday')
-            }}
+            $vuetify.locale.getScope()
+              .t('$vuetify.weeks.friday')
+          }}
           </v-tab>
         </v-tabs>
       </v-card>
     </template>
   </v-app-bar>
-  <v-app-bar height=5 rounded v-if="loading"><v-progress-linear :indeterminate="true"/></v-app-bar>
+  <v-app-bar height=5 rounded v-if="loading"><v-progress-linear :indeterminate="true" /></v-app-bar>
   <v-container fluid>
     <template v-if="menusComputed">
-      <SingleMenu v-for="(menu,index) in menusComputed.menus" :key="index" :menu="menu" @rate="rateMenu"/>
+      <SingleMenu v-for="(menu, index) in menusComputed.menus" :key="index" :menu="menu" @rate="rateMenu" />
     </template>
     <template v-else>
       <v-card>
         <v-container>
-          <div  class="d-flex justify-center my-1">
-            <v-img :src="require('/src/assets/burger.svg')" class="burger" max-width="50%"/>
+          <div class="d-flex justify-center my-1">
+            <v-img :src="require('/src/assets/burger.svg')" class="burger" max-width="50%" />
           </div>
           <h2 class="text-center">
             {{
@@ -165,7 +165,11 @@ function fetchMenuAll() {
 }
 
 onMounted(async () => {
-  if (Date.now() - menus.value.loadedAt >= 1000 * 60 * 5) { await fetchMenuAll() } else { registryRatingAll() }
+  if (Date.now() - menus.value.loadedAt >= 1000 * 60 * 5) {
+    await fetchMenuAll()
+  } else {
+    registryRatingAll()
+  }
 });
 
 onUnmounted(() => {

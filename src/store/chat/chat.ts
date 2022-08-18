@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
-import db, { currentUser, user } from '@/core/database'
 import { GunDataNode } from 'gun'
 import {
   computed, ComputedRef, reactive, ref,
 } from 'vue'
-import { Nullable } from '@/store/useStorage'
 import { nanoid } from 'nanoid'
+import { Nullable } from '@/store/useStorage'
+import db, { currentUser, user } from '@/core/database'
 
 // because gun type definition is not complete...
 type GunState = {

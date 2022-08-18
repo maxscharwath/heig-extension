@@ -1,9 +1,9 @@
 <template>
   <v-app class="app" theme="dark">
     <v-locale-provider :locale="settings.language">
-      <NavBar/>
+      <NavBar />
       <v-main>
-        <router-view/>
+        <router-view />
       </v-main>
     </v-locale-provider>
   </v-app>

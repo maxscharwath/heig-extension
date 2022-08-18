@@ -2,12 +2,12 @@ import { TypedEmitter } from 'tiny-typed-emitter';
 import ky, { Options } from 'ky';
 import { KyInstance } from 'ky/distribution/types/ky';
 import { Input } from 'ky/distribution/types/options';
-import CourseInterface from '@/core/entity/CourseInterface';
-import GradeInterface from '@/core/entity/GradeInterface';
-import CheerioResponse, { CheerioResponsePromise } from '@/core/CheerioResponse'
 import objectHash from 'object-hash';
 import browser from 'webextension-polyfill';
 import { satisfies } from 'compare-versions';
+import CourseInterface from '@/core/entity/CourseInterface';
+import GradeInterface from '@/core/entity/GradeInterface';
+import CheerioResponse, { CheerioResponsePromise } from '@/core/CheerioResponse'
 
 export type Credentials = {
   username: string;

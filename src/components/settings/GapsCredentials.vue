@@ -8,7 +8,7 @@
               $vuetify.locale.getScope()
                 .t('$vuetify.settings.gapsCredentials.title')
             }}
-            <check-gaps-status/>
+            <check-gaps-status />
           </v-card-title>
         </v-expansion-panel-title>
         <v-expansion-panel-text>
@@ -34,16 +34,16 @@
             />
           </v-card-text>
           <v-card-actions>
-            <v-spacer></v-spacer>
+            <v-spacer />
             <v-btn color="error" @click="logout" :disabled="loading">{{
-                $vuetify.locale.getScope()
-                  .t('$vuetify.settings.logout')
-              }}
+              $vuetify.locale.getScope()
+                .t('$vuetify.settings.logout')
+            }}
             </v-btn>
             <v-btn color="primary" @click="login" :loading="loading">{{
-                $vuetify.locale.getScope()
-                  .t('$vuetify.settings.login')
-              }}
+              $vuetify.locale.getScope()
+                .t('$vuetify.settings.login')
+            }}
             </v-btn>
           </v-card-actions>
         </v-expansion-panel-text>
@@ -53,9 +53,9 @@
 </template>
 
 <script lang="ts" setup>
-import CheckGapsStatus from '@/components/CheckGapsStatus.vue'
 import browser from 'webextension-polyfill'
 import { ref } from 'vue'
+import CheckGapsStatus from '@/components/CheckGapsStatus.vue'
 import { settings } from '@/store/store'
 
 const credentials = ref<{

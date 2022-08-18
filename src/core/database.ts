@@ -2,11 +2,11 @@ import GUN from 'gun';
 import 'gun/lib/then';
 import 'gun/sea';
 
-import { GunHost } from '@/core/env';
 import { ref } from 'vue'
+import objectHash from 'object-hash'
+import { GunHost } from '@/core/env';
 import { Nullable } from '@/store/useStorage'
 import { info, settings } from '@/store/store'
-import objectHash from 'object-hash'
 
 const db = GUN({
   peers: GunHost,

@@ -6,14 +6,14 @@
     <v-card-text class="d-flex justify-center">
       <div>
         <div class="text-overline">{{ menu.starter }}</div>
-        <v-divider/>
+        <v-divider />
         <div class="text-h6">{{ menu.mainCourse[0] }}</div>
         <div class="text-overline">{{
-            menu.mainCourse.slice(1)
-              .join('\n')
-          }}
+          menu.mainCourse.slice(1)
+            .join('\n')
+        }}
         </div>
-        <v-divider/>
+        <v-divider />
         <div class="text-overline">{{ menu.dessert }}</div>
       </div>
     </v-card-text>
@@ -29,8 +29,8 @@
         half-increments
         hover
         length="5"
-        @change="$emit('rate',menu.hash,menu.rating.value)"
-      ></v-rating>
+        @change="$emit('rate', menu.hash, menu.rating.value)"
+      />
     </v-card-actions>
   </v-card>
 </template>

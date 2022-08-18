@@ -1,5 +1,5 @@
 <template>
-  <v-card @click="raw=!raw">
+  <v-card @click="raw = !raw">
     <pre v-highlightjs class="wrap" v-if="raw && store.raw">
       <code class="text">{{store.raw.value}}</code>
     </pre>

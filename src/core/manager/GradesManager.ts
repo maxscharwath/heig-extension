@@ -1,10 +1,10 @@
 import objectHash from 'object-hash';
 import { TypedEmitter } from 'tiny-typed-emitter';
+import browser from 'webextension-polyfill';
 import CourseInterface from '@/core/entity/CourseInterface';
 import GradeInterface from '@/core/entity/GradeInterface';
 import SectionInterface from '@/core/entity/SectionInterface';
 import { useStorage } from '@/store/useStorage';
-import browser from 'webextension-polyfill';
 
 export type Grade = {
   course: Omit<CourseInterface, 'sections'>,
@@ -93,7 +93,11 @@ export default class GradesManager extends TypedEmitter<{
           if (!this.gradesHash.value?.has(hash)) {
             newGrades.push(result);
             if (this.newGradesNotification.value) {
-              this.newGradesNotification.value[grade.uuid] = [course.uuid, section.uuid, grade.uuid];
+              this.newGradesNotification.value[grade.uuid] = [
+                course.uuid,
+                section.uuid,
+                grade.uuid,
+              ];
             }
             this.emit('newGrade', result);
           }

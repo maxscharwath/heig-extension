@@ -1,11 +1,11 @@
+import browser from 'webextension-polyfill'
+import { satisfies } from 'compare-versions'
 import Gaps from '@/core/Gaps'
 import GradesManager from '@/core/manager/GradesManager';
 import {
   settings, info, years, logs,
 } from '@/store/store'
-import browser from 'webextension-polyfill'
 import { useStorage } from '@/store/useStorage'
-import { satisfies } from 'compare-versions'
 
 (async () => {
   const version = useStorage<string>({

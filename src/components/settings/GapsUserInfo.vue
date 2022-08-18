@@ -2,7 +2,7 @@
   <v-card v-if="info" class="mb-3">
     <v-card-title class="d-flex justify-center">
       <v-avatar size="100">
-        <v-img :cover="true" :src="info.pictureUrl" alt="profile"/>
+        <v-img :cover="true" :src="info.pictureUrl" alt="profile" />
       </v-avatar>
     </v-card-title>
     <v-card-text>
@@ -16,24 +16,24 @@
               <v-list-item>
                 <v-list-item-title>{{
                   $vuetify.locale.getScope()
-                  .t('$vuetify.settings.email')
-                  }}
+                    .t('$vuetify.settings.email')
+                }}
                 </v-list-item-title>
                 <v-list-item-subtitle>{{ info.email }}</v-list-item-subtitle>
               </v-list-item>
               <v-list-item>
                 <v-list-item-title>{{
                   $vuetify.locale.getScope()
-                  .t('$vuetify.settings.phone')
-                  }}
+                    .t('$vuetify.settings.phone')
+                }}
                 </v-list-item-title>
                 <v-list-item-subtitle>{{ info.phoneNumber }}</v-list-item-subtitle>
               </v-list-item>
               <v-list-item>
                 <v-list-item-title>{{
                   $vuetify.locale.getScope()
-                  .t('$vuetify.settings.address')
-                  }}
+                    .t('$vuetify.settings.address')
+                }}
                 </v-list-item-title>
                 <v-list-item-subtitle>{{ info.addressStreet }}</v-list-item-subtitle>
                 <v-list-item-subtitle>{{ info.addressCity }}</v-list-item-subtitle>
@@ -41,8 +41,8 @@
               <v-list-item>
                 <v-list-item-title>
                   {{
-                  $vuetify.locale.getScope()
-                  .t('$vuetify.settings.birthday')
+                    $vuetify.locale.getScope()
+                      .t('$vuetify.settings.birthday')
                   }}
                 </v-list-item-title>
                 <v-list-item-subtitle>

@@ -1,8 +1,8 @@
+import { ref } from 'vue'
 import { useStorage } from '@/store/useStorage'
 import { Log, UserInfo } from '@/core/Gaps'
 import CourseInterface from '@/core/entity/CourseInterface'
 import { type NewGrades } from '@/core/manager/GradesManager'
-import { ref } from 'vue'
 import { MenuResponse } from '@/store/Menu'
 
 export const settings = useStorage({
