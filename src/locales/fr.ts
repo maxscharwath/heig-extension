@@ -2,8 +2,9 @@ export default {
   routes: {
     grade: 'Notes',
     menu: 'Menu',
-    settings: 'Paramètres',
+    settings: 'Réglages',
     debug: 'Débogage',
+    chat: 'Chat',
   },
   weeks: {
     monday: 'Lundi',
@@ -21,6 +22,7 @@ export default {
   },
   menu: {
     menuOfDay: 'Menu du jour',
+    noMenu: 'Pas de menu disponible aujourd\'hui...',
   },
   settings: {
     title: 'Réglages',
@@ -30,7 +32,20 @@ export default {
     phone: 'Téléphone',
     address: 'Adresse',
     birthday: 'Date de naissance',
-    gapsCredentials: 'Gaps Connexion',
+    gapsCredentials: {
+      title: 'Gaps Connexion',
+      alert: {
+        success: 'Connexion réussie',
+        error: 'Connexion échouée',
+      },
+      status: {
+        pending: 'En cours...',
+        connectedToken: 'Connecté avec le token',
+        connectedCredentials: 'Connecté avec les identifiants',
+        notConnected: 'Non connecté',
+        unknown: 'Inconnu',
+      },
+    },
     logout: 'Déconnexion',
     login: 'Connexion',
     save: 'Enregistrer',
@@ -45,5 +60,11 @@ export default {
       title: 'Verification des notes',
       data: 'Toutes les {0} minutes',
     },
+  },
+  chat: {
+    alert: {
+      needToBeConnected: 'Vous devez être connecté pour pouvoir discuter',
+    },
+    sendMessage: 'Envoyer un message',
   },
 };

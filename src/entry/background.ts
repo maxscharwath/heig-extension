@@ -1,6 +1,8 @@
-import Gaps from '@/core/Gaps';
+import Gaps from '@/core/Gaps'
 import GradesManager from '@/core/manager/GradesManager';
-import { settings, info, years } from '@/store/store'
+import {
+  settings, info, years, logs,
+} from '@/store/store'
 import browser from 'webextension-polyfill'
 import { useStorage } from '@/store/useStorage'
 import { satisfies } from 'compare-versions'
@@ -20,13 +22,15 @@ import { satisfies } from 'compare-versions'
   console.log(`Background script loaded at ${new Date().toLocaleString()}`);
 
   const gaps = new Gaps();
+  gaps.on('log', (log) => {
+    logs.value = [log, ...logs.value ?? []].slice(0, 10);
+  });
+
   const manager = new GradesManager();
 
   async function checkResults() {
-    console.log('checkResults');
     try {
       if (!await gaps.autoLogin(settings.value?.credentials)) {
-        console.log('autoLogin failed');
         return;
       }
       if (!info.value) {
@@ -71,7 +75,6 @@ import { satisfies } from 'compare-versions'
   });
 
   browser.alarms.onAlarm.addListener(async (alarm) => {
-    console.log('onAlarm', alarm);
     if (alarm.name === 'checkResults') {
       await checkResults();
     }
@@ -85,7 +88,6 @@ import { satisfies } from 'compare-versions'
   });
 
   browser.runtime.onMessage.addListener(async (request) => {
-    console.log('onMessage', request);
     const payload = request.payload ?? {};
     switch (request.type) {
       case 'fetchResults':
@@ -95,6 +97,22 @@ import { satisfies } from 'compare-versions'
         await logout();
         await browser.action.setBadgeText({ text: '' });
         return { success: true };
+      case 'verify':
+        return { success: await gaps.verifyCredentials(payload) };
+      case 'checkConnexion': {
+        const isCredentialsValid = await gaps.verifyCredentials({
+          username: settings.value?.credentials?.username ?? '',
+          password: settings.value?.credentials?.password ?? '',
+        });
+        const isConnected = await gaps.loginCookie();
+        return {
+          success: isConnected,
+          data: {
+            credentials: isCredentialsValid,
+            connected: isConnected,
+          },
+        };
+      }
       case 'login':
         return { success: await login(payload) };
       default:

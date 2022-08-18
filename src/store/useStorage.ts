@@ -1,6 +1,7 @@
 import {
-  ref, Ref, UnwrapRef, watch,
-} from 'vue';
+  computed,
+  ref, Ref, UnwrapRef, watch, WatchStopHandle, WritableComputedRef,
+} from 'vue'
 import { nanoid } from 'nanoid';
 import browser from 'webextension-polyfill'
 import objectHash from 'object-hash'
@@ -11,17 +12,25 @@ import * as buffer from 'base64-arraybuffer'
 export type Nullable<T> = T | null;
 export type CanBePromise<T> = T | Promise<T>;
 
+type NodeStorageAddons<T> = {
+  // eslint-disable-next-line no-use-before-define
+  get: <K extends keyof T>(key:K) => NodeStorage<T[K]>;
+  on(callback:(value:T)=> void): () => void;
+  off(): void;
+}
+export type NodeStorage<T> = Ref<T> & NodeStorageAddons<T>;
+
 type ChromeStorageAddons<T> = {
   getId: () => string;
   raw: Ref<Nullable<string>>,
   error: Ref<Nullable<string>>;
   set: (value: UnwrapRef<Partial<T>> | UnwrapRef<T>) => void;
+  get: <K extends keyof T>(key: K) => NodeStorage<T[K]>;
   unlink: () => void;
   clear: () => void;
-  onChange: (_cb: (_newValue: UnwrapRef<Nullable<T>>) => void) => void;
+  onChange: (_cb: (_newValue: UnwrapRef<T>) => void) => void;
 }
 export type ChromeStorage<T> = Ref<UnwrapRef<T> | null> & ChromeStorageAddons<T>;
-
 type Transformer<T=any, U=any> = {
   read: (_value: U) => CanBePromise<T>,
   write: (_value: T) => CanBePromise<U>,
@@ -39,6 +48,49 @@ export interface ChromeStorageOptions<Id extends string, Value> {
 
 const uuid = nanoid();
 
+function getNode<T extends Record<string, any>, K extends keyof T>(object: T, key:K): NodeStorage<T[K]> {
+  const subscribers = new Set<WatchStopHandle>();
+  return Object.assign<WritableComputedRef<T[K]>, NodeStorageAddons<T[K]>>(computed({
+    get() {
+      return object[key];
+    },
+    set(newValue) {
+      object[key] = newValue;
+    },
+  }), {
+    get: <U extends keyof T[K]>(subKey: U) => getNode(object[key], subKey),
+    on(callback:(value:T[K])=> void) {
+      let hash:string;
+      const unsubscribe = watch(object, ({ [key]: value }) => {
+        const newHash = objectHash(value);
+        if (hash !== newHash) {
+          hash = newHash;
+          callback(value);
+        }
+      }, { deep: true, immediate: true });
+      subscribers.add(unsubscribe);
+      return () => {
+        subscribers.delete(unsubscribe);
+        unsubscribe();
+      }
+    },
+    off() {
+      subscribers.forEach((stop) => stop());
+      subscribers.clear();
+    },
+  });
+}
+
+/**
+ * Store data in chrome storage. The data is stored as compressed string.
+ * @param options ChromeStorageOptions
+ * - id: the id of the storage
+ * - defaultState: the default state of the storage, can be a function or a value
+ * - storageArea: the storage area, default is 'local'
+ * - onChange: callback when the storage is changed
+ * - onLoad: callback when the storage is loaded
+ * @returns ChromeStorage
+ */
 export function useStorage<Value = unknown, Id extends string = string>(
   {
     id,
@@ -50,7 +102,6 @@ export function useStorage<Value = unknown, Id extends string = string>(
     onLoad,
   }: ChromeStorageOptions<Id, Value>,
 ): ChromeStorage<Value> {
-  console.log(`[${uuid}] useStorage: ${id}`);
   const trans:Transformer[] = [
     preTransformers,
     {
@@ -64,8 +115,8 @@ export function useStorage<Value = unknown, Id extends string = string>(
     },
   ].flat();
   const transformer: Transformer<UnwrapRef<Value>, string> = {
-    write: (value) => trans.reduce(async (acc, { write }) => write(await acc), value as any),
     read: (value) => trans.reduceRight(async (acc, { read }) => read(await acc), value as any),
+    write: (value) => trans.reduce(async (acc, { write }) => write(await acc), value as any),
   }
   const loadDefaultState = () => (defaultState instanceof Function ? defaultState() : defaultState ?? null)
   const state = ref<Nullable<Value>>(loadDefaultState());
@@ -77,7 +128,6 @@ export function useStorage<Value = unknown, Id extends string = string>(
   browser.storage[storageArea].get(id)
     .then(async (items) => {
       if (items[id]?.uuid !== uuid && items[id]?.data) {
-        console.log(`[${uuid}] Loading ${id} from ${storageArea}`);
         raw.value = items[id].data;
         state.value = await transformer.read(items[id].data);
         onLoad?.(state.value);
@@ -96,7 +146,6 @@ export function useStorage<Value = unknown, Id extends string = string>(
     if (data === (await browser.storage[storageArea].get(id))[id]?.data) {
       return;
     }
-    console.log(`[${uuid}] Saving ${id} to ${storageArea}`);
     browser.storage[storageArea]
       .set({
         [id]: {
@@ -128,7 +177,6 @@ export function useStorage<Value = unknown, Id extends string = string>(
     raw.value = newValue.data;
     const tmpState = await transformer.read(newValue.data);
     if (objectHash(tmpState as any) === objectHash(state.value as any)) { return; }
-    console.log(`[${uuid}] Loading ${id} from ${storageArea}`);
     state.value = tmpState;
   };
   browser.storage.onChanged.addListener(chromeListener);
@@ -143,6 +191,7 @@ export function useStorage<Value = unknown, Id extends string = string>(
         state.value = value as UnwrapRef<Value>;
       }
     },
+    get: (key) => getNode(state.value as Value, key),
     unlink: () => {
       browser.storage.onChanged.removeListener(chromeListener);
       unwatch();

@@ -1,8 +1,9 @@
 import { useStorage } from '@/store/useStorage'
-import { UserInfo } from '@/core/Gaps'
+import { Log, UserInfo } from '@/core/Gaps'
 import CourseInterface from '@/core/entity/CourseInterface'
-import { NewGrades } from '@/core/manager/GradesManager'
+import { type NewGrades } from '@/core/manager/GradesManager'
 import { ref } from 'vue'
+import { MenuResponse } from '@/store/Menu'
 
 export const settings = useStorage({
   id: 'settings',
@@ -37,4 +38,18 @@ export const updateAt = useStorage<Date, string>({
     read: (value) => new Date(value ?? 0),
     write: (value) => value.toISOString(),
   },
+});
+
+export const logs = useStorage<Log[]>({
+  id: 'logs',
+  defaultState: [],
+});
+
+export const menus = ref<{
+  loadedAt: number,
+  today?: MenuResponse,
+  week: MenuResponse[],
+}>({
+  loadedAt: 0,
+  week: [],
 });

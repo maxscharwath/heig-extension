@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar :extended="showMenu" app dense>
+  <v-app-bar :extended="showMenu" app dense class="px-4">
     <div class="text-caption">
       {{
         $vuetify.locale.getScope()
@@ -23,13 +23,13 @@
       </v-btn>
     </template>
   </v-app-bar>
-  <v-progress-linear v-if="loading" :indeterminate="true"/>
+  <v-app-bar height=5 rounded v-if="loading"><v-progress-linear :indeterminate="true"/></v-app-bar>
   <v-container fluid>
     <v-expansion-panels v-if="result" multiple>
       <template v-for="course in result" :key="course.name">
         <v-expansion-panel v-if="!!course.average">
           <v-expansion-panel-title>
-            <v-list-item-icon
+            <v-icon
               v-if="courseHasNewGrade(course.uuid)"
               class="mr-2"
               color="yellow" icon="mdi-new-box" size="large"
@@ -52,7 +52,7 @@
             <v-expansion-panels multiple>
               <v-expansion-panel v-for="section in course.sections" :key="section.name">
                 <v-expansion-panel-title>
-                  <v-list-item-icon
+                  <v-icon
                     v-if="sectionHasNewGrade(section.uuid)"
                     class="mr-2"
                     color="yellow" icon="mdi-new-box" size="large"
@@ -68,10 +68,12 @@
                       <v-list-item v-if="!!grade.grade"
                                    @focus="checkGrade(grade.uuid)"
                                    @mouseover="checkGrade(grade.uuid)">
-                        <v-list-item-icon
-                          v-if="gradeIsNew(grade.uuid)"
-                          class="mr-2" color="yellow" icon="mdi-new-box" size="large"/>
-                        <v-list-item-header>
+
+                        <template v-slot:prepend v-if="gradeIsNew(grade.uuid)" >
+                          <v-avatar icon size="x-small">
+                            <v-icon color="yellow" icon="mdi-new-box" size="large"/>
+                          </v-avatar>
+                        </template>
                           <v-list-item-title>{{ grade.name }}</v-list-item-title>
                           <v-list-item-subtitle>
                             <v-chip :ripple="false" class="mr-1" size="x-small" variant="outlined">
@@ -87,10 +89,9 @@
                               {{ new Date(grade.date).toLocaleDateString() }}
                             </v-chip>
                           </v-list-item-subtitle>
-                        </v-list-item-header>
-                        <v-list-item-action>
+                        <template v-slot:append>
                           <v-chip color="primary">{{ grade.grade }}</v-chip>
-                        </v-list-item-action>
+                        </template>
                       </v-list-item>
                     </template>
                   </v-list>

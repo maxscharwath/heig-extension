@@ -19,5 +19,8 @@ module.exports = {
     'no-param-reassign': ['error', { props: false }],
     'global-require': 'off',
     'no-undef': 'off',
+    'import/no-named-as-default-member': 'off',
+    'vuejs-accessibility/no-autofocus': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
   },
 };

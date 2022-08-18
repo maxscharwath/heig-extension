@@ -15,7 +15,7 @@
   "host_permissions": [
     "https://apix.blacktree.io/*",
     "*://*.heig-vd.ch/*",
-    "*://gun.stmx.ch/*"
+    "*://heig-gunjs.herokuapp.com/*"
   ],
   "action": {
     "default_popup": "popup.html"

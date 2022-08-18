@@ -23,7 +23,6 @@ export type UserInfo = {
   phoneNumber: string;
   addressStreet: string;
   pictureId: number;
-  picture: string;
   pictureUrl: string;
   id: number;
   email: string;
@@ -31,8 +30,38 @@ export type UserInfo = {
   faculty: string;
 };
 
+export type Log = {
+  date: string;
+  request: {
+    headers: Record<string, string>;
+    method: string;
+    body: any;
+    url: string;
+    params: Record<string, string>;
+  };
+  response: {
+    duration: number;
+    headers: Record<string, string>;
+    body: string;
+    status: {
+      code: number;
+      message: string
+    }
+  };
+}
+
+declare global {
+  interface Request{
+    meta?: {
+      [key: string]: any;
+      startAt: number;
+    }
+  }
+}
+
 export default class GAPS extends TypedEmitter<{
   loginError: (_status: string) => void;
+  log: (_log: Log) => void;
   sessionExpireSoon: (_expireIn: number) => void;
 }> {
   readonly #client: KyInstance;
@@ -43,13 +72,48 @@ export default class GAPS extends TypedEmitter<{
 
   #baseUrl = 'https://gaps.heig-vd.ch';
 
+  #logs:Log[] = [];
+
   public constructor() {
     super();
     this.#client = ky.create({
       prefixUrl: this.#baseUrl,
       credentials: 'same-origin',
       hooks: {
+        beforeRequest: [
+          async (request) => {
+            request.meta = {
+              ...request.meta,
+              startAt: Date.now(),
+            }
+            return request;
+          },
+        ],
         afterResponse: [
+          async (request, options, response) => {
+            const log: Log = {
+              request: {
+                url: request.url,
+                method: request.method,
+                headers: Object.fromEntries(request.headers.entries()),
+                body: request.meta?.body,
+                params: Object.fromEntries(new URL(request.url).searchParams.entries()),
+              },
+              response: {
+                status: {
+                  code: response.status,
+                  message: response.statusText,
+                },
+                duration: request.meta?.startAt ? Date.now() - request.meta.startAt : -1,
+                headers: Object.fromEntries(response.headers.entries()),
+                body: await response.clone().text(),
+              },
+              date: new Date().toISOString(),
+            }
+            this.#logs.push(log);
+            this.emit('log', log);
+            return response;
+          },
           async (_request, _options, response) => CheerioResponse.from(response),
         ],
       },
@@ -59,6 +123,10 @@ export default class GAPS extends TypedEmitter<{
         console.error('GAPS version is not compatible');
       }
     })();
+  }
+
+  public getLogs(): Log[] {
+    return this.#logs;
   }
 
   public async hasToken(): Promise<boolean> {
@@ -94,6 +162,22 @@ export default class GAPS extends TypedEmitter<{
       method: 'GET',
     });
     await chrome.cookies.remove({ name: 'GAPSSESSID', url: this.#baseUrl })
+  }
+
+  public async verifyCredentials(credentials: Credentials): Promise<boolean> {
+    const response = this.request('consultation/etudiant', {
+      method: 'POST',
+      verify: false,
+      credentials: 'omit',
+      searchParams: {
+        login: credentials.username,
+        password: credentials.password,
+        submit: 'Entrer',
+      },
+    });
+    const data = await response.text();
+    const userIdMatch = data.match(/DEFAULT_STUDENT_ID = (\d+);/);
+    return !!userIdMatch;
   }
 
   public async loginCredentials(credentials: Credentials): Promise<boolean> {
@@ -346,7 +430,6 @@ export default class GAPS extends TypedEmitter<{
         .text()
         .trim(),
       pictureId,
-      picture: await this.getPicture(pictureId),
       pictureUrl: this.getPictureUrl(pictureId),
       birthday: new Date(
         $infos

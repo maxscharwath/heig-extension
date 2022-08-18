@@ -17,19 +17,26 @@ export const routes: Array<RouteRecordRaw & { icon: string, i18n: string, debug?
     component: () => import('@/views/MenuView.vue'),
   },
   {
-    path: '/settings',
-    icon: 'mdi-cog',
-    name: 'settings',
-    i18n: '$vuetify.routes.settings',
-    component: () => import('@/views/SettingsView.vue'),
-  },
-  {
     path: '/debug',
     icon: 'mdi-bug',
     name: 'debug',
     i18n: '$vuetify.routes.debug',
     debug: true,
     component: () => import('@/views/DebugView.vue'),
+  },
+  {
+    path: '/chat',
+    icon: 'mdi-chat',
+    name: 'chat',
+    i18n: '$vuetify.routes.chat',
+    component: () => import('@/views/ChatView.vue'),
+  },
+  {
+    path: '/settings',
+    icon: 'mdi-cog',
+    name: 'settings',
+    i18n: '$vuetify.routes.settings',
+    component: () => import('@/views/SettingsView.vue'),
   },
 ];
 

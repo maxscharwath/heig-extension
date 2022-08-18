@@ -14,9 +14,9 @@ import { PropType, ref } from 'vue'
 import { ChromeStorage } from '@/store/useStorage'
 
 const raw = ref(false)
-const props = defineProps({
+defineProps({
   store: {
-    type: Object as PropType<ChromeStorage<any>>,
+    type: Object as PropType<ChromeStorage<never>>,
     required: true,
   },
 });

@@ -24,6 +24,6 @@
     "identity",
     "https://apix.blacktree.io/*",
     "*://*.heig-vd.ch/*",
-    "*://gun.stmx.ch/*"
+    "*://heig-gunjs.herokuapp.com/*"
   ]
 }

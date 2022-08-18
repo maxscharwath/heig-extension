@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar :extended="showWeek" app dense>
+  <v-app-bar :extended="showWeek" app>
     <v-app-bar-title>{{
         $vuetify.locale.getScope()
           .t('$vuetify.menu.menuOfDay')
@@ -13,7 +13,7 @@
       <v-icon>mdi-refresh</v-icon>
     </v-btn>
     <template v-if="showWeek" v-slot:extension>
-      <div class="w-100">
+      <v-card>
         <v-tabs v-model="selectedDay" center-active show-arrows>
           <v-tab>{{
               $vuetify.locale.getScope()
@@ -41,12 +41,29 @@
             }}
           </v-tab>
         </v-tabs>
-      </div>
+      </v-card>
     </template>
   </v-app-bar>
-  <v-progress-linear v-if="loading" :indeterminate="true"/>
-  <v-container v-if="menus" fluid>
-    <SingleMenu v-for="(menu,index) in menus.menus" :key="index" :menu="menu" @rate="rateMenu"/>
+  <v-app-bar height=5 rounded v-if="loading"><v-progress-linear :indeterminate="true"/></v-app-bar>
+  <v-container fluid>
+    <template v-if="menusComputed">
+      <SingleMenu v-for="(menu,index) in menusComputed.menus" :key="index" :menu="menu" @rate="rateMenu"/>
+    </template>
+    <template v-else>
+      <v-card>
+        <v-container>
+          <div  class="d-flex justify-center my-1">
+            <v-img :src="require('/src/assets/burger.svg')" class="burger" max-width="50%"/>
+          </div>
+          <h2 class="text-center">
+            {{
+              $vuetify.locale.getScope()
+                .t('$vuetify.menu.noMenu')
+            }}
+          </h2>
+        </v-container>
+      </v-card>
+    </template>
   </v-container>
 </template>
 
@@ -58,21 +75,19 @@ import {
 import db from '@/core/database';
 import SingleMenu from '@/components/SingleMenu.vue';
 import { TopChefAPI } from '@/core/env';
-import { info } from '@/store/store'
+import { info, menus } from '@/store/store'
 import { Menu, MenuResponse, MenuWeekResponse } from '@/store/Menu'
 
 const showWeek = ref(false);
 const selectedDay = ref<number>(0);
 
-const menusToday = ref<MenuResponse>();
-const menusWeek = ref<MenuResponse[]>([]);
 const loading = ref(false);
 
-const menus = computed(() => {
-  if (showWeek.value && menusWeek.value[selectedDay.value]) {
-    return menusWeek.value[selectedDay.value];
+const menusComputed = computed(() => {
+  if (showWeek.value && menus.value.week[selectedDay.value]) {
+    return menus.value.week[selectedDay.value];
   }
-  return menusToday.value;
+  return menus.value.today;
 });
 
 const ratings = db.get('menu_ratings');
@@ -105,7 +120,7 @@ async function fetchWeekMenu() {
     },
   });
   const data = (await response.json()) as MenuWeekResponse;
-  menusWeek.value = data.days.map((day) => ({
+  menus.value.week = data.days.map((day) => ({
     ...day,
     menus: day.menus.map((menu) => ({
       ...menu,
@@ -116,13 +131,12 @@ async function fetchWeekMenu() {
       },
     })),
   }));
-  menusWeek.value.forEach((day) => day.menus.forEach(registerRating));
 }
 
 async function fetchMenu() {
   const response = await fetch('https://apix.blacktree.io/top-chef/today');
   const data = (await response.json()) as MenuResponse;
-  menusToday.value = {
+  menus.value.today = {
     ...data,
     menus: data.menus.map((menu) => ({
       ...menu,
@@ -133,22 +147,43 @@ async function fetchMenu() {
       },
     })),
   };
-  menusToday.value.menus.forEach(registerRating);
+}
+
+function registryRatingAll() {
+  menus.value.today?.menus.forEach(registerRating);
+  menus.value.week.forEach((day) => day.menus.forEach(registerRating));
 }
 
 function fetchMenuAll() {
   loading.value = true;
   Promise.allSettled([fetchMenu(), fetchWeekMenu()])
     .finally(() => {
+      registryRatingAll();
+      menus.value.loadedAt = Date.now();
       loading.value = false;
     });
 }
 
-onMounted(() => {
-  fetchMenuAll();
+onMounted(async () => {
+  if (Date.now() - menus.value.loadedAt >= 1000 * 60 * 5) { await fetchMenuAll() } else { registryRatingAll() }
 });
 
 onUnmounted(() => {
   ratings.off();
 });
 </script>
+
+<style scoped>
+.burger{
+  animation-name: floating;
+  animation-duration: 2.5s;
+  animation-direction: alternate;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes floating {
+  0% { transform: translateY(7px); }
+  100%   { transform: translateY(-7px); }
+}
+</style>
