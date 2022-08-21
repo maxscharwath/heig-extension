@@ -27,5 +27,6 @@ module.exports = {
     'import/extensions': 'off',
     'import/no-extraneous-dependencies': 'off',
     'import/no-unresolved': 'off',
+    'no-return-assign': 'off',
   },
 };

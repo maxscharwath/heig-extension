@@ -4,17 +4,12 @@
     <gaps-credentials class="mb-3" />
     <v-card class="mb-3">
       <v-list>
-        <v-list-subheader>{{
-          $vuetify.locale.getScope()
-            .t('$vuetify.settings.title')
-        }}
+        <v-list-subheader>
+          {{ $vuetify.locale.getScope().t('$vuetify.settings.title') }}
         </v-list-subheader>
         <v-list-item prepend-icon="mdi-clock">
           <v-list-item-title>
-            {{
-              $vuetify.locale.getScope()
-                .t('$vuetify.settings.alarm.title')
-            }}
+            {{ $vuetify.locale.getScope().t('$vuetify.settings.alarm.title') }}
           </v-list-item-title>
           <v-slider
             v-model.lazy="settings.checkResultsInterval"
@@ -25,10 +20,7 @@
             show-ticks="always"
           />
           <v-list-item-subtitle>
-            {{
-              $vuetify.locale.getScope()
-                .t('$vuetify.settings.alarm.data', settings.checkResultsInterval)
-            }}
+            {{ $vuetify.locale.getScope().t('$vuetify.settings.alarm.data', settings.checkResultsInterval) }}
           </v-list-item-subtitle>
         </v-list-item>
         <v-list-item prepend-icon="mdi-translate">
@@ -43,6 +35,27 @@
             item-title="text"
             item-value="value"
           />
+        </v-list-item>
+      </v-list>
+    </v-card>
+
+    <v-card class="mb-3">
+      <v-list>
+        <v-list-subheader>
+          {{$vuetify.locale.getScope().t('$vuetify.settings.enableFunctionality.title') }}
+        </v-list-subheader>
+        <v-list-item
+          v-for="functionality in enableFunctionalities"
+          :prepend-icon="functionality.icon"
+          :key="functionality"
+        >
+          <v-list-item-title>
+            {{ $vuetify.locale.getScope().t(functionality.i18n) }}
+            <v-chip v-if="functionality.beta">BETA</v-chip>
+          </v-list-item-title>
+          <template v-slot:append>
+            <v-switch inset hide-details v-model="functionality.value" />
+          </template>
         </v-list-item>
       </v-list>
     </v-card>
@@ -66,7 +79,7 @@
             }}
           </v-list-item-title>
           <v-list-item-subtitle>
-            {{ storageSize }}
+            {{ fileSize(storageSizeBytes) }}
           </v-list-item-subtitle>
         </v-list-item>
         <v-list-item @dblclick="router.push('/debug')" prepend-icon="mdi-information">
@@ -93,13 +106,14 @@
 <script lang="ts" setup>
 
 import {
-  computed, onMounted, onUnmounted, ref,
+  onMounted, onUnmounted, ref,
 } from 'vue'
 import browser from 'webextension-polyfill'
 import { useRouter } from 'vue-router'
 import { settings } from '@/store/store'
 import GapsCredentials from '@/components/settings/GapsCredentials.vue'
 import GapsUserInfo from '@/components/settings/GapsUserInfo.vue'
+import { fileSize } from '@/core/utils'
 
 const router = useRouter();
 
@@ -107,23 +121,18 @@ const getManifest = () => browser.runtime.getManifest();
 
 const storageSizeBytes = ref(0)
 
-const storageSize = computed(() => {
-  const size = storageSizeBytes.value
-  if (size < 1024) {
-    return `${size} bytes`
-  }
-  if (size < 1024 * 1024) {
-    return `${(size / 1024).toFixed(2)} KB`
-  }
-  if (size < 1024 * 1024 * 1024) {
-    return `${(size / 1024 / 1024).toFixed(2)} MB`
-  }
-  return `${(size / 1024 / 1024 / 1024).toFixed(2)} GB`
-})
 const languages = [
   { text: 'English', value: 'en' },
   { text: 'Français', value: 'fr' },
 ];
+const enableFunctionalities = ref([
+  {
+    i18n: '$vuetify.settings.enableFunctionality.functionalities.enableChat',
+    icon: 'mdi-chat',
+    beta: true,
+    value: settings.get('enableFunctionality').get('enableChat'),
+  },
+]);
 
 async function clearCache() {
   await browser.storage.local.clear();

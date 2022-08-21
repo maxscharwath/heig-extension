@@ -57,8 +57,8 @@ async function getAuthor(node: GunDataNode<any>): Promise<Nullable<Author>> {
 async function useChatMessage(node: GunDataNode<StoredChatMessage>):Promise<Nullable<ChatMessageData>> {
   const data = {
     uuid: node.uuid,
-    message: await Gun.SEA.decrypt(node.secret, '#foo'),
-    author: await getAuthor(node),
+    message: await Gun.SEA.decrypt(node.secret, '#foo').catch(() => null),
+    author: await getAuthor(node).catch(() => null),
     postedAt: new Date((Gun.state as GunState).is(node, 'secret')),
   }
 

@@ -13,9 +13,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed, unref } from 'vue'
 import { routes } from '@/router';
 
-const filtredRoutes = computed(() => routes.filter((route) => !route.debug));
+const filtredRoutes = computed(() => routes.filter((route) => unref(route.enable)));
 
 </script>

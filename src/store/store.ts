@@ -12,6 +12,16 @@ export const settings = useStorage({
       username: '',
       password: '',
     },
+    checkCredentials: {
+      lastCheckAt: new Date(0),
+      status: {
+        credentials: false,
+        connected: false,
+      },
+    },
+    enableFunctionality: {
+      enableChat: false,
+    },
     checkResultsInterval: 10,
     language: 'en',
   },

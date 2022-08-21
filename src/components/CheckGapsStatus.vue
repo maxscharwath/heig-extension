@@ -1,12 +1,12 @@
 <template>
-  <v-tooltip>
+  <v-tooltip v-if="!isLoading">
     <template v-slot:activator="{ props }">
       <v-icon
         :icon="currentStatus.icon"
         size="small"
         :color="currentStatus.color"
         v-bind="props"
-        @click="check"
+        @click="check(true)"
       />
     </template>
     {{
@@ -14,10 +14,18 @@
         .t(currentStatus.text)
     }}
   </v-tooltip>
+  <v-progress-circular
+    :indeterminate="true"
+    :size="24"
+    class="ml-2"
+    color="primary"
+    v-else />
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, ref } from 'vue'
+import {
+  computed, onMounted, onUnmounted, ref,
+} from 'vue'
 import browser from 'webextension-polyfill'
 import { settings } from '@/store/store'
 
@@ -32,11 +40,6 @@ const status = {
     color: 'green',
     text: '$vuetify.settings.gapsCredentials.status.connectedCredentials',
   },
-  pending: {
-    icon: 'mdi-clock',
-    color: 'orange',
-    text: '$vuetify.settings.gapsCredentials.status.pending',
-  },
   notConnected: {
     icon: 'mdi-alert-circle',
     color: 'red',
@@ -48,30 +51,32 @@ const status = {
     text: '$vuetify.settings.gapsCredentials.status.unknown',
   },
 }
-const currentStatus = ref(status.unknown);
 
-async function check() {
-  currentStatus.value = status.pending;
-  const response = await browser.runtime.sendMessage({
-    type: 'checkConnexion',
-  });
-  console.log(response);
-  if (response.success) {
-    currentStatus.value = response.data.credentials
+const isLoading = ref(false);
+
+const currentStatus = computed(() => {
+  if (!settings.value) return status.unknown
+  if (settings.value.checkCredentials.status.connected) {
+    return settings.value.checkCredentials.status.credentials
       ? status.connectedCredentials
       : status.connectedToken;
-  } else {
-    currentStatus.value = status.notConnected;
   }
+  return status.notConnected;
+})
+
+async function check(force = false) {
+  if (!force
+    && (new Date(settings.value?.checkCredentials.lastCheckAt ?? 0).getTime()) > Date.now() + 1000 * 60 * 5) return
+  isLoading.value = true;
+  await browser.runtime.sendMessage({
+    type: 'checkConnexion',
+  }).finally(() => isLoading.value = false);
 }
-const credentials = settings.get('credentials');
+const credentialsRef = settings.get('credentials');
 onMounted(() => {
-  check();
-  credentials.on(() => {
-    check();
-  });
+  credentialsRef.on(() => check());
 });
 onUnmounted(() => {
-  credentials.off();
+  credentialsRef.off();
 });
 </script>

@@ -14,7 +14,7 @@
     "service_worker": "/background.js"
   },
   "host_permissions": [
-    "https://apix.blacktree.io/*",
+    "*://apix.blacktree.io/*",
     "*://*.heig-vd.ch/*",
     "*://heig-gunjs.herokuapp.com/*"
   ],
@@ -24,6 +24,6 @@
   "permissions": [
     "alarms",
     "storage",
-    "cookies",
+    "cookies"
   ]
 }

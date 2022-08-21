@@ -46,6 +46,12 @@ export default {
         unknown: 'Inconnu',
       },
     },
+    enableFunctionality: {
+      title: 'Fonctionnalités',
+      functionalities: {
+        enableChat: 'Activer le chat',
+      },
+    },
     logout: 'Déconnexion',
     login: 'Connexion',
     save: 'Enregistrer',

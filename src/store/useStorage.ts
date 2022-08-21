@@ -8,13 +8,18 @@ import objectHash from 'object-hash'
 import CryptoJS from 'crypto-js'
 import pako from 'pako'
 import * as buffer from 'base64-arraybuffer'
+import merge from 'merge'
 
 export type Nullable<T> = T | null;
 export type CanBePromise<T> = T | Promise<T>;
+export type RecursivePartial<T> = { [P in keyof T]?: RecursivePartial<T[P]>; };
+
+// TODO: seams to be a bug in the chained api.
 
 type NodeStorageAddons<T> = {
   // eslint-disable-next-line no-use-before-define
   get: <K extends keyof T>(key:K) => NodeStorage<T[K]>;
+  set: (value: UnwrapRef<RecursivePartial<T>> | UnwrapRef<T>) => T;
   on(callback:(value:T)=> void): () => void;
   off(): void;
 }
@@ -24,7 +29,7 @@ type ChromeStorageAddons<T> = {
   getId: () => string;
   raw: Ref<Nullable<string>>,
   error: Ref<Nullable<string>>;
-  set: (value: UnwrapRef<Partial<T>> | UnwrapRef<T>) => void;
+  set: (value: UnwrapRef<RecursivePartial<T>> | UnwrapRef<T>) => T;
   get: <K extends keyof T>(key: K) => NodeStorage<T[K]>;
   unlink: () => void;
   clear: () => void;
@@ -54,13 +59,15 @@ function getNode<T extends Record<string, any>, K extends keyof T>(object: T, ke
     get() {
       return object[key];
     },
-    set(newValue) {
-      object[key] = newValue;
+    set(value) {
+      object[key] = Object.isExtensible(value) ? merge.recursive(false, object[key], value) : value;
     },
   }), {
     get: <U extends keyof T[K]>(subKey: U) => getNode(object[key], subKey),
+    set: (value) => object[key] = merge.recursive(false, object[key], value),
     on(callback:(value:T[K])=> void) {
       let hash:string;
+      // TODO bug: watch didnt work with when parent node is changed
       const unsubscribe = watch(object, ({ [key]: value }) => {
         const newHash = objectHash(value);
         if (hash !== newHash) {
@@ -184,13 +191,7 @@ export function useStorage<Value = unknown, Id extends string = string>(
     error,
     raw,
     getId: () => id,
-    set: (value) => {
-      if (state.value instanceof Object && value instanceof Object) {
-        state.value = { ...state.value, ...value };
-      } else {
-        state.value = value as UnwrapRef<Value>;
-      }
-    },
+    set: (value) => state.value = Object.isExtensible(value) ? merge.recursive(false, state.value, value) : value,
     get: (key) => getNode(state.value as Value, key),
     unlink: () => {
       browser.storage.onChanged.removeListener(chromeListener);

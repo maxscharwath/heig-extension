@@ -11,7 +11,7 @@
             <v-chip class="ma-1">{{ log.request.method}}</v-chip>
             <v-chip class="ma-1">{{ log.response.duration }}ms</v-chip>
             <v-chip class="ma-1">{{ new Date(log.date).toLocaleString() }}</v-chip>
-            <v-chip class="ma-1">{{ log.response.body.length }}</v-chip>
+            <v-chip class="ma-1">{{ fileSize(log.response.body.length) }}</v-chip>
           </div>
         </v-list-item-subtitle>
       </v-list-item>
@@ -31,6 +31,7 @@
 import * as stores from '@/store/store'
 import CodeBlock from '@/components/CodeBlock.vue'
 import { logs } from '@/store/store'
+import { fileSize } from '@/core/utils'
 
 const storesList = Object.entries(stores);
 

@@ -482,7 +482,6 @@ export default class GAPS extends TypedEmitter<{
                 .text();
               this.emit('loginError', statusText);
               console.error(`Login error: ${statusText}`);
-              throw new Error(`Login failed: ${statusText}`);
             }
             return res;
           },

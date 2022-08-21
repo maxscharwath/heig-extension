@@ -100,17 +100,17 @@ import { useStorage } from '@/store/useStorage'
       case 'verify':
         return { success: await gaps.verifyCredentials(payload) };
       case 'checkConnexion': {
-        const isCredentialsValid = await gaps.verifyCredentials({
-          username: settings.value?.credentials?.username ?? '',
-          password: settings.value?.credentials?.password ?? '',
-        });
-        const isConnected = await gaps.loginCookie();
-        return {
-          success: isConnected,
-          data: {
-            credentials: isCredentialsValid,
-            connected: isConnected,
+        const credentials = settings.get('credentials').value;
+        const data = settings.get('checkCredentials').set({
+          lastCheckAt: new Date(),
+          status: {
+            credentials: await gaps.verifyCredentials(credentials),
+            connected: await gaps.autoLogin(credentials),
           },
+        })
+        return {
+          success: data.status.connected,
+          data,
         };
       }
       case 'login':
